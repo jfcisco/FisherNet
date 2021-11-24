@@ -1,8 +1,19 @@
 /**
- * FisherNet Program Template v2.0
+ * FisherNet v1.0
+ * November 26, 2021
  * 
- * Standard template to make programming 
- * easier for everyone.
+ * In fulfillment of the final project requirement
+ * for CMSC 205: Data Communications and Networking
+ * 
+ * Faculty-in-Charge: 
+ *    Gulshan Vasson
+ * 
+ * Team Members:
+ *    Arguelles
+ *    Cunanan
+ *    Francisco
+ *    Malla
+ *    Santos
  */
 
 // =============
@@ -13,8 +24,6 @@
 #define EGIZMO
 
 #include "PinAssignments.h"
-// Reminder: Use the name (BTN_1) instead of writing the pin number directly (i.e., 32).
-// Doing this ensures that your code will run on both LILYGO and EGIZMO devices
 
 // ==================
 // Libraries Setup
