@@ -70,55 +70,56 @@ void errormessage() {
   oled.display();
 }
 
-void confirmationmessage() {
-  oled.clearDisplay(); // clear display
-  delay(100); // wait for initializing
-  oled.setTextSize(1);          // text size
-  oled.setTextColor(WHITE);     // text color
-  oled.setCursor(0, 10);        // position to display
-
-  switch (distresssignal) { //modifying messages and alert notifications based on button clicked.
-    case 0:
-      oled.println("Select a distress signal first");
-      oled.display();
-      break;
-
-    case 1:
-      oled.println("Technical emergency relayed");
-      oled.println("\nLong press any key to main menu");
-      oled.display();
-      Serial.println("Distress signal 1");
-      break;
-
-    case 2:
-      oled.println("Fleet alerted of hostile party");
-      oled.println("\nLong press any key to main menu");
-      oled.display();
-      Serial.println("Distress signal 2");
-      break;
-
-    case 3:
-      oled.println("Sinking SOS relayed");
-      oled.println("\nLong press any key to main menu");
-      oled.display();
-      Serial.println("Distress signal 3");
-      break;
-
-    case 4:
-      oled.println("Medical emergency relayed");
-      oled.println("\nLong press any key to main menu");
-      oled.display();
-      Serial.println("Distress signal 4");
-      break;
-
-    case 5:
-      oled.println("Your distress signal is being relayed to your fleet");
-      oled.println("\nLong press any key to main menu");
-      oled.display();
-      Serial.println("Distress signal 5");
-      break;
-  }
-}
+// Replaced by B_DistressSignal program
+//void confirmationmessage() {
+//  oled.clearDisplay(); // clear display
+//  delay(100); // wait for initializing
+//  oled.setTextSize(1);          // text size
+//  oled.setTextColor(WHITE);     // text color
+//  oled.setCursor(0, 10);        // position to display
+//
+//  switch (distresssignal) { //modifying messages and alert notifications based on button clicked.
+//    case 0:
+//      oled.println("Select a distress signal first");
+//      oled.display();
+//      break;
+//
+//    case 1:
+//      oled.println("Technical emergency relayed");
+//      oled.println("\nLong press any key to main menu");
+//      oled.display();
+//      Serial.println("Distress signal 1");
+//      break;
+//
+//    case 2:
+//      oled.println("Fleet alerted of hostile party");
+//      oled.println("\nLong press any key to main menu");
+//      oled.display();
+//      Serial.println("Distress signal 2");
+//      break;
+//
+//    case 3:
+//      oled.println("Sinking SOS relayed");
+//      oled.println("\nLong press any key to main menu");
+//      oled.display();
+//      Serial.println("Distress signal 3");
+//      break;
+//
+//    case 4:
+//      oled.println("Medical emergency relayed");
+//      oled.println("\nLong press any key to main menu");
+//      oled.display();
+//      Serial.println("Distress signal 4");
+//      break;
+//
+//    case 5:
+//      oled.println("Your distress signal is being relayed to your fleet");
+//      oled.println("\nLong press any key to main menu");
+//      oled.display();
+//      Serial.println("Distress signal 5");
+//      break;
+//  }
+//}
 
 void cancelmessage() {
   oled.clearDisplay(); // clear display
@@ -156,62 +157,26 @@ void BTN_5_select() {
 
 //DOUBLE CLICK FUNCTIONS
 void BTN_1_confirm() {
-  if (distresssignal != 0) {
-    errormessage(); //to ensure that selection doesn't overlap once an initial selection has been made
-  }
-  else {
-    // distresssignal = 1; //change 'distresssignal' to the correct alert level
-    // confirmationmessage();
-    // delay(1000);
-    currentAlertLevel = ALERT_TECHNICAL;
-    changeProgramState(IN_DISTRESS);
-  }
+  currentAlertLevel = ALERT_TECHNICAL;
+  changeProgramState(IN_DISTRESS);
 }
 
 void BTN_2_confirm() {
-  if (distresssignal != 0) {
-    errormessage();
-  }
-  else {
-    // distresssignal = 2;
-    // confirmationmessage();
-    currentAlertLevel = ALERT_HOSTILE;
-    changeProgramState(IN_DISTRESS);
-  }
+  currentAlertLevel = ALERT_HOSTILE;
+  changeProgramState(IN_DISTRESS);
 }
 
 void BTN_3_confirm() {
-  if (distresssignal != 0) {
-    errormessage();
-  }
-  else {
-    // distresssignal = 3;
-    // onfirmationmessage();
-    currentAlertLevel = ALERT_SINKING;
-    changeProgramState(IN_DISTRESS);
-  }
+  currentAlertLevel = ALERT_SINKING;
+  changeProgramState(IN_DISTRESS);
 }
 
 void BTN_4_confirm() {
-  if (distresssignal != 0) {
-    errormessage();
-  }
-  else {
-    // distresssignal = 4;
-    // confirmationmessage();
-    currentAlertLevel = ALERT_MEDICAL;
-    changeProgramState(IN_DISTRESS);
-  }
+  currentAlertLevel = ALERT_MEDICAL;
+  changeProgramState(IN_DISTRESS);
 }
 
 void BTN_5_confirm() {
-  if (distresssignal != 0) {
-    errormessage();
-  }
-  else {
-    // distresssignal = 5;
-    // confirmationmessage();
-    currentAlertLevel = ALERT_GENERAL;
-    changeProgramState(IN_DISTRESS);
-  }
+  currentAlertLevel = ALERT_GENERAL;
+  changeProgramState(IN_DISTRESS);
 }
