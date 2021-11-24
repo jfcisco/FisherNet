@@ -1,9 +1,10 @@
 #define DISTRESS_SIGNAL_INTERVAL 30000
 
-// bool inDistress = false;
 unsigned long timeLastSignalSent = 0;
 DistressResponse lastResponse;
-bool receivedResponse = false;
+bool receivedResponse;
+// Did the user double click while in this state?
+bool didError = false;
 
 DistressResponse dummyRes = {
   {
@@ -15,6 +16,7 @@ DistressResponse dummyRes = {
 };
 
 void DistressSignal_setup(AlertLevel al) {
+  receivedResponse = false;
   currentAlertLevel = al;
   // Set OLED color to white
   oled.setTextColor(WHITE);
@@ -64,7 +66,6 @@ void handleClick() {
   return;
 }
 
-bool didError = false;
 void handleConfirm() {
   // Trigger error message
   didError = true;
