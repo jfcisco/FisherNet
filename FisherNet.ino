@@ -57,11 +57,52 @@ TinyGPSPlus gps;
 #define LORA_FREQUENCY 433.0 // Frequency in MHz. Different for SG!
 FisherMesh mesh(NODE_ADDRESS, LORA_FREQUENCY);
 
+// =========================
+// Program State Definition
+// =========================
+
+typedef enum {
+  DEFAULT_MENU,
+  IN_DISTRESS
+}
+ProgramState;
+
 // =================
 // Main Program
 // =================
 
+ProgramState currentState = DEFAULT_MENU;
+AlertLevel currentAlertLevel;
+
+void DistressSignal_setup(AlertLevel al);
+
 void setup() {
+  setupDevice();
+  
+  // Call the setup function of the current state
+  setupState(currentState);
+}
+
+void loop() {
+  updateButtons();
+  updateGps();
+
+  // Call the loop function of the current state
+  switch (currentState) {
+    case DEFAULT_MENU:
+      DefaultMenu_loop();    
+      break;
+    case IN_DISTRESS:
+      DistressSignal_loop();
+      break;
+  }
+}
+
+// =================
+// Helper Functions
+// =================
+
+void setupDevice() {
   Serial.begin(115200);
   setupOled();
   setupGps();
@@ -71,20 +112,8 @@ void setup() {
     oled.display();
     while (true);
   }
-  // Add your program's setup code below:
-  
 }
 
-void loop() {
-  updateButtons();
-  updateGps();
-  // Add your program's loop code below:
-  
-}
-
-// =================
-// Helper Functions
-// =================
 void setupOled() {
   // Initialize OLED display with address 0x3C for 128x64
   if (!oled.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
@@ -104,10 +133,36 @@ void updateGps() {
     gps.encode(gpsSerial.read());
 }
 
+// Ticks buttons as required by OneButton
 void updateButtons() {
   button1.tick();
   button2.tick();
   button3.tick();
   button4.tick();
   button5.tick();
+}
+
+// Transitions from the current program state to a new one
+void changeProgramState(ProgramState newState) {
+  currentState = newState;
+  setupState(newState);
+}
+
+// Calls setup method of a given program state
+void setupState(ProgramState state) {
+  switch (state) {
+    case DEFAULT_MENU:
+      DefaultMenu_setup();
+      break;
+    case IN_DISTRESS:
+      DistressSignal_setup(currentAlertLevel);
+      break;
+  }
+}
+
+// Checks if the given lat and long are valid
+bool isValidGps(float latitude, float longitude) {
+  if (latitude < -90.0 || latitude > 90.0) return false;
+  if (longitude < - 180.0 || longitude > 180.0) return false;
+  return true;
 }

@@ -15,9 +15,9 @@
 // Defines the types of alert level
 typedef enum {
   ALERT_TECHNICAL = 0,
-  ALERT_SECURITY = 1,
-  ALERT_SAFETY = 2,
-  ALERT_HOSTILE = 3,
+  ALERT_HOSTILE = 1,
+  ALERT_SINKING = 2, 
+  ALERT_MEDICAL = 3,
   ALERT_GENERAL = 4
 }
 AlertLevel;
@@ -84,11 +84,6 @@ public:
 
   // Gets the last distress signal received (if we are listening for distress signals)
   DistressSignal getDistessSignal();
-
-  static const char* getNameOfAlertLevel()
-  {
-    
-  }
 
 private:
   uint8_t _address;
