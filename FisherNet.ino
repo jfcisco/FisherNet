@@ -63,7 +63,8 @@ FisherMesh mesh(NODE_ADDRESS, LORA_FREQUENCY);
 
 typedef enum {
   DEFAULT_MENU,
-  IN_DISTRESS
+  IN_DISTRESS,
+  RESCUER_MENU
 }
 ProgramState;
 
@@ -95,6 +96,9 @@ void loop() {
     case IN_DISTRESS:
       DistressSignal_loop();
       break;
+    case RESCUER_MENU:
+      Rescuer_loop();
+      break;
   }
 }
 
@@ -104,6 +108,7 @@ void loop() {
 
 void setupDevice() {
   Serial.begin(115200);
+  Serial.println(String(NODE_ADDRESS) + " loading");
   setupOled();
   setupGps();
   if (!mesh.init()) {
@@ -156,6 +161,9 @@ void setupState(ProgramState state) {
       break;
     case IN_DISTRESS:
       DistressSignal_setup(currentAlertLevel);
+      break;
+    case RESCUER_MENU:
+      Rescuer_setup();
       break;
   }
 }
