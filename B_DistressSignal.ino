@@ -56,8 +56,8 @@ void DistressSignal_setup(AlertLevel al) {
   button5.setPressTicks(300); //time to distinguish click vs long press
   button5.setClickTicks(500); //time to distinguish click vs double click
 
-  // FIXME: For Debugging
-  lastResponse = dummyRes;
+  // Uncomment for testing display
+  // lastResponse = dummyRes;
 }
 
 void handleClick() {
@@ -159,11 +159,9 @@ void showRescueeMenu() {
     drawBeamingCircle(phase);
     
     // Continuously print out response if there is one received
-    //  if (receivedResponse) {
-    //    displayLastResponseInfo(lastResponse);
-    //  }
-    // FIXME testing only
-    displayLastResponseInfo(lastResponse);
+    if (receivedResponse) {
+      displayLastResponseInfo(lastResponse);
+    }
     oled.display();
   }
   else {
@@ -198,18 +196,6 @@ void displayLastResponseInfo(DistressResponse res) {
     // And then, show the distance
     oled.print("DIS: ");
     oled.print(distanceInMeters, DEC);
-    oled.print("m");
-  }
-  else {
-    double distanceInMeters = TinyGPSPlus::distanceBetween(
-                                14.6764,
-                                121.1055,
-                                res.gpsLat,
-                                res.gpsLong);
-
-    // And then, show the distance
-    oled.print("DIS: ");
-    oled.print(distanceInMeters, 0);
     oled.print("m");
   }
 }
