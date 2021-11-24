@@ -1,6 +1,3 @@
-//defining variables
-char distresssignal = 0;
-
 void DefaultMenu_setup() {
   //Display Main Menu
   mainmenu();
