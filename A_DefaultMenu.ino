@@ -1,3 +1,5 @@
+bool distRec; //rescuer - distress signal received
+
 void DefaultMenu_setup() {
   //Display Main Menu
   mainmenu();
@@ -39,7 +41,13 @@ void DefaultMenu_setup() {
 }
 
 void DefaultMenu_loop() {
-
+  distRec = mesh.listenForDistressSignal();
+  if (distRec) {
+    receivedSignal = mesh.getDistessSignal();
+    // Set distress signal variable to received signal data
+    // Change state to RESCUER_MENU
+    changeProgramState(RESCUER_MENU);
+  }
 }
 
 //MENU FUNCTIONS
