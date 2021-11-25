@@ -1,6 +1,6 @@
 /**
  * FisherNet v1.0
- * November 26, 2021
+ * November 27, 2021
  * 
  * In fulfillment of the final project requirement
  * for CMSC 205: Data Communications and Networking
@@ -64,7 +64,8 @@ FisherMesh mesh(NODE_ADDRESS, LORA_FREQUENCY);
 typedef enum {
   DEFAULT_MENU,
   IN_DISTRESS,
-  RESCUER_MENU
+  RESCUER_MENU,
+  RESCUE_MODE
 }
 ProgramState;
 
@@ -74,6 +75,7 @@ ProgramState;
 
 ProgramState currentState = DEFAULT_MENU;
 AlertLevel currentAlertLevel;
+DistressSignal receivedSignal;
 
 void DistressSignal_setup(AlertLevel al);
 
@@ -163,7 +165,7 @@ void setupState(ProgramState state) {
       DistressSignal_setup(currentAlertLevel);
       break;
     case RESCUER_MENU:
-      Rescuer_setup();
+      Rescuer_setup(receivedSignal);
       break;
   }
 }
