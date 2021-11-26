@@ -3,6 +3,7 @@ float currLong = 999.0;
 bool gpsVal = false;
 //Distress signal global vars
 DistressSignal distData;
+unsigned long timeLastResponseSent;
 
 //global situaion variables
 bool distIgn; //rescuer - distress signal ignored
@@ -30,10 +31,25 @@ Situation;
  *  4 distress accepted - to the rescue mode
  *  5 distress signal ignored
  */
+//
+//DistressSignal dummyDistress = {
+//  {
+//    DISTRESS_SIGNAL
+//  },
+//  99, // address
+//  14.6760, // gpsLat
+//  121.1050 // gpsLng
+//};
 
  void Rescuer_setup(DistressSignal distress) {
+  oled.clearDisplay();
+  oled.setTextSize(1);
+  oled.setTextColor(WHITE);
+  
   // Initialize variables
   distData = distress;
+  // distData = dummyDistress;
+  timeLastResponseSent = 0;
   distRec = true; //rescuer - distress signal received
   distIgn = false; //rescuer - distress signal ignored
   distAcc = false; //rescuer - distress signal accepted
@@ -41,11 +57,19 @@ Situation;
 
   // Add click handlers
   button1.attachClick(handleButton1Click);
+  // For testing purposes:
+  button1.attachLongPressStart(handleButton2Click);
+  button1.setPressTicks(300); //time to distinguish click vs long press
+  button1.setClickTicks(500); //time to distinguish click vs double click
+
+  
   button2.attachClick(handleButton2Click);
   button3.attachClick(handleButton3Click);
   button4.attachClick(handleButton4Click);
   button5.attachClick(handleButton5Click);
  }
+
+
 
 void Rescuer_loop() {
   //getupdated gps
@@ -55,6 +79,12 @@ void Rescuer_loop() {
     currLat = gps.location.lat();
     currLong = gps.location.lng();
   }
+  else {
+    currLat = 999.0;
+    currLong = 999.0;
+  }
+
+  unsigned long currentRescuerTime = millis();
 
   //OLED input strings
   String str[8] = {"","","","","","","",""};
@@ -70,21 +100,23 @@ void Rescuer_loop() {
     case 3:
       //3 distress received - those in distress can't be rescuers
       //display rescuee info
-      str[0] = "Boat ID: " + String(distData.address) + " in DISTRESS!";
-      str[1] = "Latitude: " + String(distData.gpsLat);
-      str[2] = "Longitude: " + String(distData.gpsLong);
+      str[0] = "BOAT " + String(distData.address) + " DISTRESS";
 
       // Check if GPS data is valid
       if (gpsVal && isValidGps(distData.gpsLat, distData.gpsLong)) {
-        str[3] = "Distance: " + String(gps.distanceBetween(currLat, currLong, distData.gpsLat, distData.gpsLong));
+        str[1] = "LAT: " + String(distData.gpsLat);
+        str[2] = "LONG: " + String(distData.gpsLong);
+        str[3] = "DIS: " + String(gps.distanceBetween(currLat, currLong, distData.gpsLat, distData.gpsLong));
       }
       else {
-        str[3] = "Distance: GPS data not available";
+        str[1] = "LAT: Not Available";
+        str[2] = "LONG: Not Available";
+        str[3] = "DIS: Not Available";
       }
-      str[4] = "Alert Level: " + String(distData.alertLevel);
+      str[4] = "AL " + String(distData.alertLevel + 1);
       str[5] = " ";
-      str[6] = "Press Button 1 to Rescue";
-      str[7] = "Press Button 2 to not Rescue";
+      str[6] = "BTN 1 RESCUE";
+      str[7] = "BTN 2 IGNORE";
 
       showInOled(str);
       break;
@@ -95,24 +127,33 @@ void Rescuer_loop() {
       // TODO: Add code to continuously listen for updated distress signals from the original vessel
       // What if the received distress signal does not match the original vessel?
       // We should ignore those and just focus on the original vessel
-      str[0] = "Boat ID: " + String(distData.address) + " in DISTRESS!";
-      str[1] = "Latitude: " + String(distData.gpsLat);
-      str[2] = "Longitude: " + String(distData.gpsLong);
+      str[0] = "RES " + String(distData.address);
+      str[1] = "LAT: " + String(distData.gpsLat);
+      str[2] = "LONG: " + String(distData.gpsLong);
 
-      if (gpsVal && isValidGps(distData.gpsLat, distData.gpsLong)){
-        str[3] = "Distance: " + String(gps.distanceBetween(currLat, currLong, distData.gpsLat, distData.gpsLong));
-      } else{
-        str[3] = "Distance: GPS data not available";
+      if (gpsVal && isValidGps(distData.gpsLat, distData.gpsLong)) {
+        str[1] = "LAT: " + String(distData.gpsLat);
+        str[2] = "LONG: " + String(distData.gpsLong);
+        str[3] = "DIS: " + String(gps.distanceBetween(currLat, currLong, distData.gpsLat, distData.gpsLong));
+      } 
+      else {
+        str[1] = "LAT: Not Available";
+        str[2] = "LONG: Not Available";
+        str[3] = "DIS: Not Available";
       }
-      str[4] = "Alert Level: " + String(distData.alertLevel);
+      str[4] = "AL " + String(distData.alertLevel + 1);
       str[5] = " ";
-      str[6] = "Press Button 1 to End/Cancel Rescue";
+      str[6] = "BTN 2 END/CANCEL";
 
       showInOled(str);      
 
       // continue to get and send rescuer data/distress response
-      // TODO: Limit to broadcasting response every 30 seconds
-      distAcc = mesh.sendDistressResponse(distData.address, currLat, currLong);
+      // Limit to every 30 seconds as to not overwhelm the radio/network
+      if (currentRescuerTime - timeLastResponseSent > 30000) {
+        timeLastResponseSent = currentRescuerTime;
+        distAcc = mesh.sendDistressResponse(distData.address, currLat, currLong);
+      }
+      
       break;
     case 5:
       //5 distress signal ignored
@@ -124,6 +165,9 @@ void Rescuer_loop() {
       showInOled(str);
       break;
   } // situation switch
+
+  Serial.print("distAcc: ");
+  Serial.println(distAcc);
 }
 
 // Button handlers*******
@@ -140,14 +184,16 @@ void handleButton1Click() {
       Serial.println("Situation " +String(situation)+ " button " + String(bt));
       //3 distress received - those in distress can't be rescuers
       distAcc = mesh.sendDistressResponse(distData.address, currLat, currLong);
+      Serial.print("Accept? ");
+      Serial.println(distAcc);
       break;
     case 4:
       Serial.println("Situation " +String(situation)+ " button " + String(bt));
       //4 distress accepted - to the rescue mode
-      distRec = false;
-      distIgn = false;
-      distAcc = false;
-      break;
+//      distRec = false;
+//      distIgn = false;
+//      distAcc = false;
+//      break;
     case 5:
       Serial.println("Situation " +String(situation)+ " button " + String(bt));
       //5 distress signal ignored
@@ -171,10 +217,20 @@ void handleButton2Click() {
       distIgn = true;
       distAcc = false;
 
+      cancelRescueMessage();
+      delay(2000);
+      // Change state to rescuer menu
+      changeProgramState(DEFAULT_MENU);
       break;
     case 4:
       Serial.println("Situation " +String(situation)+ " button " + String(bt));
       //4 distress accepted - to the rescue mode
+      distRec = false;
+      distIgn = false;
+      distAcc = false;
+      cancelRescueMessage();
+      delay(2000);
+      changeProgramState(DEFAULT_MENU);
       break;
     case 5:
       Serial.println("Situation " +String(situation)+ " button " + String(bt));
@@ -256,6 +312,8 @@ void handleButton5Click() {
 }
 
 void showInOled(String str[8]){
+  oled.clearDisplay();
+  oled.setCursor(0, 0);
   //8 lines/rows
   //21 columns/chars per line
   for(int x = 0; x < 8; x++){
@@ -270,6 +328,18 @@ void showInOled(String str[8]){
   oled.display();
   
 }//show in OLED
+
+void cancelRescueMessage() {
+  oled.clearDisplay(); // clear display
+  delay(100); // wait for initializing
+  oled.setTextSize(1);          // text size
+  oled.setTextColor(WHITE);     // text color
+  oled.setCursor(0, 10);        // position to display
+  oled.println("Stopping Rescue.");
+  oled.println("");
+  oled.println("Going back to main menu.");
+  oled.display();
+}
 
 int getSituation(){
   int sit = 0;
