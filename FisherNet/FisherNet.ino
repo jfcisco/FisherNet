@@ -10,10 +10,10 @@
  * 
  * Team Members:
  *    Arguelles
- *    Cunanan
  *    Francisco
  *    Malla
  *    Santos
+ *    Seanard
  */
 
 // =============
