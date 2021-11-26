@@ -1,0 +1,4 @@
+# Maintain CRLF line endings regardless of dev environments
+*.ino text eol=crlf
+*.h text eol=crlf
+*.md text eol=crlf
