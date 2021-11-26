@@ -83,7 +83,7 @@ public:
   DistressResponse getResponse();
 
   // Gets the last distress signal received (if we are listening for distress signals)
-  DistressSignal getDistessSignal();
+  DistressSignal getDistressSignal();
 
 private:
   uint8_t _address;
@@ -174,7 +174,7 @@ bool FisherMesh::sendDistressResponse(uint8_t address, float gpsLat, float gpsLo
   memcpy(_buffer, &_distressResponse, sizeof(_distressResponse));
   
   // Send data in buffer back to the address
-  return _manager.sendtoWait(_buffer, sizeof(_distressResponse), address) != RH_ROUTER_ERROR_NONE;
+  return _manager.sendtoWait(_buffer, sizeof(_distressResponse), address) == RH_ROUTER_ERROR_NONE;
 };
     
 // Listens to distress signals  
@@ -230,7 +230,7 @@ DistressResponse FisherMesh::getResponse() {
   return _distressResponse;
 };
 
-DistressSignal FisherMesh::getDistessSignal() {
+DistressSignal FisherMesh::getDistressSignal() {
   return _distressSignal;
 }
 

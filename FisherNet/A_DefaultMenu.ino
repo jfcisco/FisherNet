@@ -43,7 +43,7 @@ void DefaultMenu_setup() {
 void DefaultMenu_loop() {
   distRec = mesh.listenForDistressSignal();
   if (distRec) {
-    receivedSignal = mesh.getDistessSignal();
+    receivedSignal = mesh.getDistressSignal();
     // Set distress signal variable to received signal data
     // Change state to RESCUER_MENU
     changeProgramState(RESCUER_MENU);
