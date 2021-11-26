@@ -1,5 +1,5 @@
 /**
- * FisherNet v1.0
+ * FisherNet v1.1
  * November 27, 2021
  * 
  * In fulfillment of the final project requirement
@@ -10,20 +10,25 @@
  * 
  * Team Members:
  *    Arguelles
- *    Cunanan
  *    Francisco
  *    Malla
  *    Santos
+ *    Seanard
  */
 
 // =============
-// Pin Setup
+// Device Setup
 // =============
-//  IMPORTANT!! Uncomment the device you are using
-// #define LILYGO
-#define EGIZMO
+//  **IMPORTANT!!** Uncomment the device you are using
+#define LILYGO
+// #define EGIZMO
+
+// **IMPORTANT!!**
+#define NODE_ADDRESS 1 // IMPORTANT: NODE_ADDRESS should be unique per device
+#define LORA_FREQUENCY 433.0 // Frequency in MHz. Different for SG!
 
 #include "PinAssignments.h"
+
 
 // ==================
 // Libraries Setup
@@ -51,10 +56,6 @@ Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 // Setup GPS
 SoftwareSerial gpsSerial(GPS_RX, GPS_TX);
 TinyGPSPlus gps;
-
-// Setup mesh network
-#define NODE_ADDRESS 1 // IMPORTANT: NODE_ADDRESS should be unique per device
-#define LORA_FREQUENCY 433.0 // Frequency in MHz. Different for SG!
 FisherMesh mesh(NODE_ADDRESS, LORA_FREQUENCY);
 
 // =========================
@@ -113,12 +114,22 @@ void setupDevice() {
   Serial.println(String(NODE_ADDRESS) + " loading");
   setupOled();
   setupGps();
-  if (!mesh.init()) {
+  
+  oled.clearDisplay();
+  oled.setTextSize(1);
+  oled.setTextColor(WHITE);
+  if (!mesh.init()) {  
     Serial.println(F("Failed to initialize mesh network"));
-    oled.println(F("Failed to initialize mesh network"));
-    oled.display();
+    oled.println("Failed to initialize mesh network");
     while (true);
   }
+  
+  oled.println("Device Setup Success");
+  
+  oled.setTextSize(2);
+  oled.println("Loading...");
+  oled.display();
+  delay(2000);
 }
 
 void setupOled() {
@@ -127,6 +138,12 @@ void setupOled() {
     Serial.println(F("SSD1306 allocation failed"));
     while (true);
   }
+
+  oled.clearDisplay();
+  oled.fillRect(0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, WHITE);
+  oled.display();
+  delay(2000);
+  oled.clearDisplay();
 }
 
 // Setup GPS serial connection
