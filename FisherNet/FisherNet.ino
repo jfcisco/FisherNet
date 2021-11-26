@@ -1,5 +1,5 @@
 /**
- * FisherNet v1.0
+ * FisherNet v1.1
  * November 27, 2021
  * 
  * In fulfillment of the final project requirement
