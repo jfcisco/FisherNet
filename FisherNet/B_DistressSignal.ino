@@ -185,7 +185,7 @@ void displayLastResponseInfo(DistressResponse res) {
   oled.print("RES: ");
   oled.print(res.address, DEC);
 
-  oled.setCursor(30, 40);
+  oled.setCursor(35, 40);
   // If both rescuee and rescuer have valid coordinates, display the distance between them
   if (gps.location.isValid() && isValidGps(res.gpsLat, res.gpsLong)) {
     double distanceInMeters = TinyGPSPlus::distanceBetween(
@@ -196,8 +196,11 @@ void displayLastResponseInfo(DistressResponse res) {
 
     // And then, show the distance
     oled.print("DIS: ");
-    oled.print(distanceInMeters, DEC);
+    oled.print(distanceInMeters, 2);
     oled.print("m");
+  }
+  else {
+    oled.print("DIS: N/A");
   }
 }
 
