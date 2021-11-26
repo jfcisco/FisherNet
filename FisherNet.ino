@@ -114,6 +114,7 @@ void setupDevice() {
   setupOled();
   setupGps();
   if (!mesh.init()) {
+    oled.clearDisplay();
     Serial.println(F("Failed to initialize mesh network"));
     oled.println(F("Failed to initialize mesh network"));
     oled.display();
@@ -127,6 +128,13 @@ void setupOled() {
     Serial.println(F("SSD1306 allocation failed"));
     while (true);
   }
+
+  oled.clearDisplay();
+  oled.fillRect(0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, WHITE);
+  oled.display();
+  delay(2000);
+  oled.fillRect(0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, BLACK);
+  oled.display();
 }
 
 // Setup GPS serial connection

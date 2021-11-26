@@ -30,7 +30,7 @@
   #define LORA_SERIAL_CLOCK 5
   #define LORA_COPI 27
   #define LORA_CIPO 19
-  #define BTN_1 2
+  #define BTN_1 38
   #define BTN_2 13
   #define BTN_3 14
   #define BTN_4 25
