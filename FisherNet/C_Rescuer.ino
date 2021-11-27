@@ -79,19 +79,17 @@ void Rescuer_loop() {
     currLat = gps.location.lat();
     currLong = gps.location.lng();
   }
-  else {
-    currLat = 999.0;
-    currLong = 999.0;
-  }
 
   unsigned long currentRescuerTime = millis();
+
 
   //OLED input strings
   String str[8] = {"","","","","","","",""};
   situation = getSituation();
+#ifdef DEBUG_MODE
   Serial.println("Situation: " + String(situation));
+#endif
   
-  // Jasper: It's best to put the code in each case in separate functions
   switch(situation){
     case 0:
     case 1:
@@ -123,6 +121,7 @@ void Rescuer_loop() {
         str[2] = "LONG: Not Available";
         str[3] = "DIS: Not Available";
       }
+      
       str[4] = "AL " + String(distData.alertLevel + 1);
       str[5] = " ";
       str[6] = "BTN 1 RESCUE";
@@ -134,10 +133,18 @@ void Rescuer_loop() {
       //4 distress accepted - to the rescue mode
       //continue to display updates rescuee info with option to cancel
 
-      // TODO: Add code to continuously listen for updated distress signals from the original vessel
       // What if the received distress signal does not match the original vessel?
       // We should ignore those and just focus on the original vessel
-      str[0] = "RES " + String(distData.address);
+      distRec = mesh.listenForDistressSignal();
+      if(distRec){
+        //get distress signal data
+        DistressSignal distDataTemp = mesh.getDistressSignal();
+        if(distDataTemp.address == distData.address){
+          distData = distDataTemp;
+        }
+      }
+      
+      str[0] = "GOTO BOAT " + String(distData.address);
       str[1] = "LAT: " + String(distData.gpsLat);
       str[2] = "LONG: " + String(distData.gpsLong);
 
@@ -151,7 +158,6 @@ void Rescuer_loop() {
           str[3] = "DIS: " + String(distanceInMeters, 2);
         }
         else {
-          // Rescuee's GPS data is invalid
           str[3] = "DIS: Not Available";
         }
       } 
@@ -185,8 +191,10 @@ void Rescuer_loop() {
       break;
   } // situation switch
 
+#ifdef DEBUG_MODE
   Serial.print("distAcc: ");
   Serial.println(distAcc);
+#endif
 }
 
 // Button handlers*******
