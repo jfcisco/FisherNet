@@ -62,6 +62,8 @@ void mainmenu() {
   oled.println("3) Sinking/Lumulubog");
   oled.println("4) Medical/Medikal");
   oled.println("5) Others/Iba pa");
+  oled.print("Address: ");
+  oled.print(mesh.getAddress());
   oled.display();
 }
 
