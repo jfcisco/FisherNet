@@ -102,13 +102,23 @@ void Rescuer_loop() {
       //display rescuee info
       str[0] = "BOAT " + String(distData.address) + " DISTRESS";
 
-      // Check if GPS data is valid
-      if (gpsVal && isValidGps(distData.gpsLat, distData.gpsLong)) {
+      // Check if GPS data from the resucee is valid
+      if (isValidGps(distData.gpsLat, distData.gpsLong)) {
         str[1] = "LAT: " + String(distData.gpsLat);
         str[2] = "LONG: " + String(distData.gpsLong);
-        str[3] = "DIS: " + String(gps.distanceBetween(currLat, currLong, distData.gpsLat, distData.gpsLong));
+
+        // Calculate distance if both rescuee and rescuer GPS data is valid
+        if (gpsVal) {
+          float distanceInMeters = gps.distanceBetween(currLat, currLong, distData.gpsLat, distData.gpsLong);
+          str[3] = "DIS: " + String(distanceInMeters, 2) + " m";
+        }
+        // If our GPS is invalid, show not available
+        else {
+          str[3] = "DIS: Not Available";
+        }
       }
       else {
+        // Rescuee's GPS data is invalid
         str[1] = "LAT: Not Available";
         str[2] = "LONG: Not Available";
         str[3] = "DIS: Not Available";
@@ -131,10 +141,19 @@ void Rescuer_loop() {
       str[1] = "LAT: " + String(distData.gpsLat);
       str[2] = "LONG: " + String(distData.gpsLong);
 
-      if (gpsVal && isValidGps(distData.gpsLat, distData.gpsLong)) {
+      if (isValidGps(distData.gpsLat, distData.gpsLong)) {
         str[1] = "LAT: " + String(distData.gpsLat);
         str[2] = "LONG: " + String(distData.gpsLong);
-        str[3] = "DIS: " + String(gps.distanceBetween(currLat, currLong, distData.gpsLat, distData.gpsLong));
+
+        // Calculate distance if both rescuee and rescuer GPS data is valid
+        if (gpsVal) {
+          float distanceInMeters = gps.distanceBetween(currLat, currLong, distData.gpsLat, distData.gpsLong);
+          str[3] = "DIS: " + String(distanceInMeters, 2);
+        }
+        else {
+          // Rescuee's GPS data is invalid
+          str[3] = "DIS: Not Available";
+        }
       } 
       else {
         str[1] = "LAT: Not Available";
