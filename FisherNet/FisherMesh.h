@@ -58,7 +58,7 @@ public:
 
   // Sets up the mesh network and its dependencies
   // Returns false if an error occurred
-  bool init();
+  bool init(uint8_t address, float frequency);
 
   // Triggers a reset in the module
   void resetModule();
@@ -79,6 +79,9 @@ public:
   // Gets the address of this node
   uint8_t getAddress();
 
+  // Gets the frequency of this node's radio
+  float getFrequency();
+
   // Gets the last distress response received (if we are listening for distress responses)
   DistressResponse getResponse();
 
@@ -96,7 +99,7 @@ private:
   static char* getNameOfAlertLevel(AlertLevel al);
 };
 
-// C++ implementation of the methods above
+// Below is the C++ implementation of the methods above
 // No need to look any further unless you want to modify the code
 FisherMesh::FisherMesh(uint8_t address, float frequency = 433.0)
   : _rf95(LORA_CHIP_SELECT, LORA_INTERRUPT),
@@ -106,7 +109,11 @@ FisherMesh::FisherMesh(uint8_t address, float frequency = 433.0)
 
 };
 
-bool FisherMesh::init() {
+bool FisherMesh::init(uint8_t address, float frequency) {
+  // Set address fields and frequency
+  _address = address;
+  _frequency = frequency;
+  
   // Ready reset pin
   pinMode(LORA_RESET, OUTPUT);
   digitalWrite(LORA_RESET, HIGH);
@@ -118,12 +125,22 @@ bool FisherMesh::init() {
     return false;
   }
 
+  // Set the address of this node.
+  _manager.setThisAddress(address);
+
+    
+  uint8_t meshAdd = _manager.thisAddress();
+  Serial.print("Node ");
+  Serial.print(meshAdd, DEC);
+  Serial.println(" intialized");
+
   // Set the radio frequency to the correct one
   if (!_rf95.setFrequency(_frequency)) {
     Serial.println("LORA Module failed to set frequency");
     return false;
   }
 
+  Serial.printf("Frequency set at %f\n", _frequency);
   return true;
 }
 
@@ -223,7 +240,11 @@ bool FisherMesh::listenForDistressResponse() {
 };
 
 uint8_t FisherMesh::getAddress() {
-  return _address;
+  return _manager.thisAddress();
+}
+
+float FisherMesh::getFrequency() {
+  return _frequency;
 }
 
 DistressResponse FisherMesh::getResponse() {
