@@ -235,3 +235,8 @@ bool isValidGps(float latitude, float longitude) {
   if (longitude < - 180.0 || longitude > 180.0) return false;
   return true;
 }
+
+// Zeroes out the unecessary button handlers 
+void doNothing() {
+  return;
+}

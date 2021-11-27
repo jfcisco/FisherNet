@@ -48,15 +48,24 @@ Situation;
 
   // Add click handlers
   button1.attachClick(handleButton1Click);
+  button1.attachDoubleClick(doNothing);
   // For testing purposes:
   button1.attachLongPressStart(handleButton2Click);
   button1.setPressTicks(300); //time to distinguish click vs long press
   button1.setClickTicks(500); //time to distinguish click vs double click
   
   button2.attachClick(handleButton2Click);
+  button2.attachDoubleClick(doNothing);
+  button2.attachLongPressStart(doNothing);
   button3.attachClick(handleButton3Click);
+  button3.attachDoubleClick(doNothing);
+  button3.attachLongPressStart(doNothing);
   button4.attachClick(handleButton4Click);
+  button4.attachDoubleClick(doNothing);
+  button4.attachLongPressStart(doNothing);
   button5.attachClick(handleButton5Click);
+  button5.attachDoubleClick(doNothing);
+  button5.attachLongPressStart(doNothing);
  }
 
 void Rescuer_loop() {
