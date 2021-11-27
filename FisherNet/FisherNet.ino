@@ -1,5 +1,5 @@
 /**
- * FisherNet v1.1
+ * FisherNet v1.2
  * November 27, 2021
  * 
  * In fulfillment of the final project requirement
@@ -20,8 +20,9 @@
 // Device Setup
 // =============
 //  **IMPORTANT!!** Uncomment the device you are using
-// #define LILYGO
-#define EGIZMO
+#define LILYGO
+// #define EGIZMO
+// #define DEBUG_MODE
 
 #include "PinAssignments.h"
 
@@ -121,17 +122,18 @@ void loop() {
 // =================
 // Helper Functions
 // =================
-
 void setupDevice() {
   Serial.begin(115200);
-  Serial.println(String(NODE_ADDRESS) + " loading");
   setupOled();
   setupGps();
   
   oled.clearDisplay();
   oled.setTextSize(1);
   oled.setTextColor(WHITE);
-  if (!mesh.init()) {  
+
+  NODE_ADDRESS = getAddress();
+  LORA_FREQUENCY = getFrequency();
+  if (!mesh.init(NODE_ADDRESS, LORA_FREQUENCY)) {  
     Serial.println(F("Failed to initialize mesh network"));
     oled.println("Failed to initialize mesh network");
     oled.display();
@@ -165,10 +167,32 @@ void setupGps() {
   gpsSerial.begin(9600);
 }
 
+#ifdef DEBUG_MODE
+unsigned long lastGpsLatLongPrint = 0;
+#endif
+
 // Updates gps with data from the module
 void updateGps() {
   while (gpsSerial.available() > 0)
     gps.encode(gpsSerial.read());
+
+#ifdef DEBUG_MODE
+  // Debug: if we haven't seen lots of data in 5 seconds, something's wrong.
+  if (millis() > 5000 && gps.charsProcessed() < 10) // uh oh
+  {
+    Serial.println("ERROR: not getting any GPS data!");
+    // dump the stream to Serial
+    Serial.println("GPS stream dump:");
+    while (true) // infinite loop
+      if (gpsSerial.available() > 0) // any data coming in?
+        Serial.write(gpsSerial.read());
+  }
+  else if (millis() - lastGpsLatLongPrint > 5000) {
+    lastGpsLatLongPrint = millis();
+    Serial.printf("Is valid? %s\n", gps.location.isValid() ? "true" : "false");
+    Serial.printf("Lat: %f, Long: %f\n", gps.location.lat(), gps.location.lng());
+  }
+#endif
 }
 
 // Ticks buttons as required by OneButton
