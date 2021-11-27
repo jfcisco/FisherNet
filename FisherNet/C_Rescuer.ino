@@ -31,15 +31,6 @@ Situation;
  *  4 distress accepted - to the rescue mode
  *  5 distress signal ignored
  */
-//
-//DistressSignal dummyDistress = {
-//  {
-//    DISTRESS_SIGNAL
-//  },
-//  99, // address
-//  14.6760, // gpsLat
-//  121.1050 // gpsLng
-//};
 
  void Rescuer_setup(DistressSignal distress) {
   oled.clearDisplay();
@@ -61,15 +52,12 @@ Situation;
   button1.attachLongPressStart(handleButton2Click);
   button1.setPressTicks(300); //time to distinguish click vs long press
   button1.setClickTicks(500); //time to distinguish click vs double click
-
   
   button2.attachClick(handleButton2Click);
   button3.attachClick(handleButton3Click);
   button4.attachClick(handleButton4Click);
   button5.attachClick(handleButton5Click);
  }
-
-
 
 void Rescuer_loop() {
   //getupdated gps
