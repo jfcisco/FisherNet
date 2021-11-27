@@ -209,9 +209,8 @@ bool FisherMesh::listenForDistressSignal() {
       // Cast the response into the struct
       DistressSignal *distressSignal = (DistressSignal *)header;
       _distressSignal = *distressSignal;
+     return true;
     }
-
-    return true;
   }
   return false;
 };
@@ -232,9 +231,8 @@ bool FisherMesh::listenForDistressResponse() {
       // Cast the response into the struct
       DistressResponse *response = (DistressResponse *)header;
       _distressResponse = *response;
+      return true;
     }
-
-    return true;
   }
   return false;
 };
