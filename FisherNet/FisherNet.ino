@@ -20,15 +20,10 @@
 // Device Setup
 // =============
 //  **IMPORTANT!!** Uncomment the device you are using
-#define LILYGO
-// #define EGIZMO
-
-// **IMPORTANT!!**
-#define NODE_ADDRESS 1 // IMPORTANT: NODE_ADDRESS should be unique per device
-#define LORA_FREQUENCY 433.0 // Frequency in MHz. Different for SG!
+// #define LILYGO
+#define EGIZMO
 
 #include "PinAssignments.h"
-
 
 // ==================
 // Libraries Setup
@@ -40,6 +35,18 @@
 #include <OneButton.h>
 #include <SoftwareSerial.h>
 #include "FisherMesh.h"
+#include <Preferences.h>
+
+// Setup Preferences library
+Preferences preferences;
+
+// Declare some funcs to appease compiler
+uint8_t getAddress(); // Definition in Z_Preferences
+float getFrequency();
+
+// **IMPORTANT!!**
+uint8_t NODE_ADDRESS = getAddress(); // IMPORTANT: NODE_ADDRESS should be unique per device
+float LORA_FREQUENCY = getFrequency(); // Frequency in MHz. Different for SG!
 
 // Setup a new OneButton pins
 OneButton button1(BTN_1, true);
@@ -53,7 +60,7 @@ OneButton button5(BTN_5, true);
 #define SCREEN_HEIGHT 64
 Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
-// Setup GPS
+// Setup GPS and Network
 SoftwareSerial gpsSerial(GPS_RX, GPS_TX);
 TinyGPSPlus gps;
 FisherMesh mesh(NODE_ADDRESS, LORA_FREQUENCY);
@@ -78,7 +85,7 @@ ProgramState currentState = DEFAULT_MENU;
 AlertLevel currentAlertLevel;
 DistressSignal receivedSignal;
 
-void DistressSignal_setup(AlertLevel al);
+// void DistressSignal_setup(AlertLevel al);
 
 void setup() {
   setupDevice();
@@ -103,6 +110,12 @@ void loop() {
       Rescuer_loop();
       break;
   }
+
+  // Get any user input from the Serial connection
+  // Used in setting preferences over serial monitor
+  if (Serial.available() > 0) {
+    parseArgs(Serial.readString());
+  }
 }
 
 // =================
@@ -121,6 +134,7 @@ void setupDevice() {
   if (!mesh.init()) {  
     Serial.println(F("Failed to initialize mesh network"));
     oled.println("Failed to initialize mesh network");
+    oled.display();
     while (true);
   }
   
