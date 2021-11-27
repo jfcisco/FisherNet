@@ -1,5 +1,5 @@
 /**
- * FisherNet v1.2
+ * FisherNet v2.0
  * November 27, 2021
  * 
  * In fulfillment of the final project requirement
@@ -124,6 +124,7 @@ void loop() {
 // =================
 void setupDevice() {
   Serial.begin(115200);
+  Serial.println("Beginning device setup...");
   setupOled();
   setupGps();
   
@@ -139,7 +140,8 @@ void setupDevice() {
     oled.display();
     while (true);
   }
-  
+
+  Serial.println("Device Setup Success");
   oled.println("Device Setup Success");
   
   oled.setTextSize(2);
@@ -160,11 +162,13 @@ void setupOled() {
   oled.display();
   delay(2000);
   oled.clearDisplay();
+  Serial.println(F("OLED Setup Success"));
 }
 
 // Setup GPS serial connection
 void setupGps() {
   gpsSerial.begin(9600);
+  Serial.println(F("GPS Serial Success"));
 }
 
 #ifdef DEBUG_MODE
