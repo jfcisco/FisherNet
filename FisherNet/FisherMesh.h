@@ -12,7 +12,7 @@
 #include <RH_RF95.h>
 #include <RHMesh.h>
 
-// Defines the types of alert level
+// Defines the types of alert levels
 typedef enum {
   ALERT_TECHNICAL = 0,
   ALERT_HOSTILE = 1,
@@ -107,7 +107,7 @@ private:
 
 // Below is the C++ implementation of the methods above
 // No need to look any further unless you want to modify the code
-FisherMesh::FisherMesh(uint8_t address, float frequency = 433.0)
+FisherMesh::FisherMesh(uint8_t address, float frequency)
   : _rf95(LORA_CHIP_SELECT, LORA_INTERRUPT),
     _manager(_rf95, address),
     _frequency(frequency),
