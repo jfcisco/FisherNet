@@ -84,7 +84,7 @@ void Rescuer_loop() {
   String str[8] = {"","","","","","","",""};
   situation = getSituation();
 #ifdef DEBUG_MODE
-  Serial.println("Situation: " + String(situation));
+  // Serial.println("Situation: " + String(situation));
 #endif
   
   switch(situation){
@@ -124,6 +124,8 @@ void Rescuer_loop() {
       str[6] = "BTN 1 RESCUE";
       str[7] = "BTN 2 IGNORE";
 
+      // Add a listen here to allow the node to still pass on messages
+      mesh.listenForDistressSignal();
       showInOled(str);
       break;
     case 4:
@@ -189,8 +191,8 @@ void Rescuer_loop() {
   } // situation switch
 
 #ifdef DEBUG_MODE
-  Serial.print("distAcc: ");
-  Serial.println(distAcc);
+  // Serial.print("distAcc: ");
+  // Serial.println(distAcc);
 #endif
 }
 
