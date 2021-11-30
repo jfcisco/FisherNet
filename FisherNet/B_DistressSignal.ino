@@ -49,10 +49,7 @@ void DistressSignal_setup(AlertLevel al) {
   button5.attachLongPressStart(handleCancel);
   button5.setPressTicks(300); //time to distinguish click vs long press
   button5.setClickTicks(500); //time to distinguish click vs double click
-}
-
-void handleClick() {
-  return;
+*/
 }
 
 void handleConfirm() {
