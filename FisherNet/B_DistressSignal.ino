@@ -1,51 +1,51 @@
 #define DISTRESS_SIGNAL_INTERVAL 30000
 
-unsigned long timeLastSignalSent = 0;
+unsigned long timeLastSignalSent;
 DistressResponse lastResponse;
 bool receivedResponse;
 // Did the user double click while in this state?
 bool didError = false;
 
 void DistressSignal_setup(AlertLevel al) {
+  // Initialize state variables
   receivedResponse = false;
   currentAlertLevel = al;
-  // Set OLED color to white
+  timeLastSignalSent = 0;
   oled.setTextColor(WHITE);
 
   // Setup button click code
-  // TODO: Move cancellation logic here
   //call BTN_1 Click functions
   button1.attachClick(handleClick);
   button1.attachDoubleClick(handleConfirm);
-  button1.attachLongPressStart(DistressSignal_BTN_1_back);
+  button1.attachLongPressStart(handleCancel);
   button1.setPressTicks(300); //time to distinguish click vs long press
   button1.setClickTicks(500); //time to distinguish click vs double click
 
   //call BTN_2 Click functions
   button2.attachClick(handleClick);
   button2.attachDoubleClick(handleConfirm);
-  button2.attachLongPressStart(DistressSignal_BTN_2_back);
+  button2.attachLongPressStart(handleCancel);
   button2.setPressTicks(300); //time to distinguish click vs long press
   button2.setClickTicks(500); //time to distinguish click vs double click
 
   //call BTN_3 Click functions
   button3.attachClick(handleClick);
   button3.attachDoubleClick(handleConfirm);
-  button3.attachLongPressStart(DistressSignal_BTN_3_back);
+  button3.attachLongPressStart(handleCancel);
   button3.setPressTicks(300); //time to distinguish click vs long press
   button3.setClickTicks(500); //time to distinguish click vs double click
 
   //call BTN_4 Click functions
   button4.attachClick(handleClick);
   button4.attachDoubleClick(handleConfirm);
-  button4.attachLongPressStart(DistressSignal_BTN_4_back);
+  button4.attachLongPressStart(handleCancel);
   button4.setPressTicks(300); //time to distinguish click vs long press
   button4.setClickTicks(500); //time to distinguish click vs double click
 
   //call BTN_5 Click functions
   button5.attachClick(handleClick);
   button5.attachDoubleClick(handleConfirm);
-  button5.attachLongPressStart(DistressSignal_BTN_5_back);
+  button5.attachLongPressStart(handleCancel);
   button5.setPressTicks(300); //time to distinguish click vs long press
   button5.setClickTicks(500); //time to distinguish click vs double click
 }
@@ -60,31 +60,7 @@ void handleConfirm() {
 }
 
 //LONG PRESS FUNCTIONS
-void DistressSignal_BTN_1_back() {
-  cancelmessage();
-  delay(2000);
-  changeProgramState(DEFAULT_MENU);
-}
-
-void DistressSignal_BTN_2_back() {
-  cancelmessage();
-  delay(2000);
-  changeProgramState(DEFAULT_MENU);
-}
-
-void DistressSignal_BTN_3_back() {
-  cancelmessage();
-  delay(2000);
-  changeProgramState(DEFAULT_MENU);
-}
-
-void DistressSignal_BTN_4_back() {
-  cancelmessage();
-  delay(2000);
-  changeProgramState(DEFAULT_MENU);
-}
-
-void DistressSignal_BTN_5_back() {
+void handleCancel() {
   cancelmessage();
   delay(2000);
   changeProgramState(DEFAULT_MENU);
