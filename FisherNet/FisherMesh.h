@@ -176,7 +176,7 @@ bool FisherMesh::sendDistressSignal(float gpsLat, float gpsLong, AlertLevel aler
       // Pass in the distressSignal as an array of bytes
       (uint8_t *)_buffer,
       sizeof(_distressSignal),
-      // Broadcast the signal instead of directing the signal to the 
+      // Broadcast the signal instead of directing the signal to a specific node
       RH_BROADCAST_ADDRESS) == RH_ROUTER_ERROR_NONE) {
         
         // The signal has been reliably delivered to a node.
@@ -232,11 +232,10 @@ bool FisherMesh::listenForDistressSignal() {
         memcpy(_buffer, distressSignal, sizeof(DistressSignal));
         
         // Rebroadcast the signal while mimicking the source
-        _manager.sendtoFromSourceWait(  
+        _manager.sendtoWait(  
           (uint8_t *)_buffer,
           sizeof(DistressSignal),
-          RH_BROADCAST_ADDRESS,
-          from);
+          RH_BROADCAST_ADDRESS);
       } 
       return true;
     }
