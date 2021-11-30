@@ -206,8 +206,7 @@ bool FisherMesh::listenForDistressSignal() {
   uint8_t len = sizeof(_buffer);
   uint8_t from;
   
-  if (_manager.recvfromAck(_buffer, &len, &from))
-  {
+  if (_manager.recvfromAck(_buffer, &len, &from)) {
     // We can do this because both types of signals 
     // (i.e. DistressResponse and DistressSignal) have a DistressHeader.
     DistressHeader *header = (DistressHeader *)_buffer;
@@ -249,8 +248,7 @@ bool FisherMesh::listenForDistressResponse() {
   uint8_t len = sizeof(_buffer);
   uint8_t from;
   
-  if (_manager.recvfromAck(_buffer, &len, &from))
-  {
+  if (_manager.recvfromAck(_buffer, &len, &from)) {
     // We can do this because both types of signals 
     // (i.e. DistressResponse and DistressSignal) have a DistressHeader.
     DistressHeader *header = (DistressHeader *)_buffer;
@@ -260,6 +258,32 @@ bool FisherMesh::listenForDistressResponse() {
       DistressResponse *response = (DistressResponse *)header;
       _distressResponse = *response;
       return true;
+    }
+    // Case when a distressed vessel catches a distress signal from another distress vessel
+    else if (len > 1 && header->msgType == DISTRESS_SIGNAL) {
+#ifdef DEBUG_MODE
+      Serial.print("Got a distress signal from: ");
+      Serial.println(from, DEC);
+#endif
+      // Cast the response into the struct
+      DistressSignal *distressSignal = (DistressSignal *)header;
+
+      if (distressSignal->hopsLeft > 0) {
+        // Decrement the distress signal's hops
+        distressSignal->hopsLeft--;
+#ifdef DEBUG_MODE
+        Serial.print("Rebroadcasting distressSignal with hopsLeft= ");
+        Serial.println(distressSignal->hopsLeft, DEC);
+#endif
+        // Copy the distress signal to buffer as an array of bytes
+        memcpy(_buffer, distressSignal, sizeof(DistressSignal));
+        
+        // Rebroadcast the signal while mimicking the source
+        _manager.sendtoWait(  
+          (uint8_t *)_buffer,
+          sizeof(DistressSignal),
+          RH_BROADCAST_ADDRESS);
+      }
     }
   }
   return false;
