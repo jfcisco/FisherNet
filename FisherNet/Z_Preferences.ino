@@ -49,10 +49,7 @@ void parseArgs(String userArg) {
         Serial.print("LoRa Frequency: ");
         Serial.println(freq, 1);
       }
-      else {
-        Serial.println("You provided invalid input.");
-        Serial.println("Please double check.");
-      }
+      else printError();
   }
   else if (getCommand(userArg) == "SET") {
     String option = getOption(userArg);
@@ -80,15 +77,15 @@ void parseArgs(String userArg) {
       Serial.print(provided, 1);
       Serial.println(" MHz");
     }
-    else {
-      Serial.println("You provided invalid input.");
-      Serial.println("Please double check.");
-    }
+    else printError();
   }
-  else {
-    Serial.println("You provided invalid input.");
-    Serial.println("Please double check.");
-  }
+  else printError();
+}
+
+// Error message when invalid input was provided (for example, address outside 0-255)
+void printError() {
+  Serial.println("You provided invalid input.");
+  Serial.println("Please double check.");
 }
 
 uint8_t getAddress() {
@@ -128,10 +125,10 @@ float getFrequency() {
   if (!prefSuccess) {
     Serial.println("Error: Opening preferences failed. Returning default value...");
     preferences.end();
-    return 433.0;
+    return 433.0; // 923.0 MHz for SG
   }
   
-  float frequency = preferences.getFloat("frequency", 433.0);
+  float frequency = preferences.getFloat("frequency", 433.0); // 923.0 MHz for SG
   preferences.end();
 
   return frequency;
