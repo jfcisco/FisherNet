@@ -22,6 +22,7 @@ typedef enum {
 }
 AlertLevel;
 
+// Possible values for msgType
 #define DISTRESS_SIGNAL 10
 #define DISTRESS_RESPONSE 20
 
@@ -38,6 +39,7 @@ typedef struct {
   float gpsLat;
   float gpsLong;
   AlertLevel alertLevel;
+  unsigned int hopsLeft;
 }
 DistressSignal;
 
@@ -49,6 +51,10 @@ typedef struct {
   float gpsLong;
 }
 DistressResponse;
+
+// Set a hop limit to optimize the flooding of the distress signal
+// Hop limit dictates how many times the distress signal should be retransmitted
+#define DISTRESS_HOP_LIMIT 5
 
 // Defines a helper class for sending and receiving data from the mesh network
 class FisherMesh {
@@ -159,6 +165,7 @@ bool FisherMesh::sendDistressSignal(float gpsLat, float gpsLong, AlertLevel aler
   _distressSignal.gpsLat = gpsLat;
   _distressSignal.gpsLong = gpsLong;
   _distressSignal.alertLevel = alertLevel;
+  _distressSignal.hopsLeft = DISTRESS_HOP_LIMIT;
   
   // Copy the distress signal into a byte buffer
   // This is needed to send the data over radio
@@ -206,10 +213,32 @@ bool FisherMesh::listenForDistressSignal() {
     DistressHeader *header = (DistressHeader *)_buffer;
     
     if (len > 1 && header->msgType == DISTRESS_SIGNAL) {
+#ifdef DEBUG_MODE
+      Serial.print("Got a distress signal from: ");
+      Serial.println(from, DEC);
+#endif
       // Cast the response into the struct
       DistressSignal *distressSignal = (DistressSignal *)header;
       _distressSignal = *distressSignal;
-     return true;
+
+      if (distressSignal->hopsLeft > 0) {
+        // Decrement the distress signal's hops
+        distressSignal->hopsLeft--;
+#ifdef DEBUG_MODE
+        Serial.print("Rebroadcasting distressSignal with hopsLeft= ");
+        Serial.println(distressSignal->hopsLeft, DEC);
+#endif
+        // Copy the distress signal to buffer as an array of bytes
+        memcpy(_buffer, distressSignal, sizeof(DistressSignal));
+        
+        // Rebroadcast the signal while mimicking the source
+        _manager.sendtoFromSourceWait(  
+          (uint8_t *)_buffer,
+          sizeof(DistressSignal),
+          RH_BROADCAST_ADDRESS,
+          from);
+      } 
+      return true;
     }
   }
   return false;
