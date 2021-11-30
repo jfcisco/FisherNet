@@ -94,7 +94,7 @@ void DistressSignal_loop() {
   // When did we last broadcast?
   // If more than 30 seconds passed, we can broadcast again
   unsigned long currentTime = millis();
-  if (currentTime - timeLastSignalSent >= DISTRESS_SIGNAL_INTERVAL)
+  if (currentTime - timeLastSignalSent >= DISTRESS_SIGNAL_INTERVAL || timeLastSignalSent == 0)
   {
     // Retrieve data to be sent (e.g., GPS, Alert Level)
     float gpsLat;
