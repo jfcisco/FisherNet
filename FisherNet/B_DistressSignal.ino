@@ -1,3 +1,4 @@
+// This code defines how to SEND distress signal from Distressed Boats
 #define DISTRESS_SIGNAL_INTERVAL 30000
 
 unsigned long timeLastSignalSent;
