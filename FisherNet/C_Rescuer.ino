@@ -124,6 +124,8 @@ void Rescuer_loop() {
       str[6] = "BTN 1 RESCUE";
       str[7] = "BTN 2 IGNORE";
 
+      // Add a listen here to allow the node to still pass on messages
+      mesh.listenForDistressSignal();
       showInOled(str);
       break;
     case 4:
