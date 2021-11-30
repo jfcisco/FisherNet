@@ -1,5 +1,5 @@
 /**
- * FisherNet v2.0
+ * FisherNet v2.2
  * November 27, 2021
  * 
  * In fulfillment of the final project requirement
@@ -22,7 +22,7 @@
 //  **IMPORTANT!!** Uncomment the device you are using
 #define LILYGO
 // #define EGIZMO
-// #define DEBUG_MODE
+#define DEBUG_MODE
 
 #include "PinAssignments.h"
 
