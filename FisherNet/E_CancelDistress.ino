@@ -1,5 +1,6 @@
 // This code covers Sending Distress Cancellation and Receiving 
 void CancelDistress_setup() {
+  Serial.println("Entered cancel distress");
   oled.clearDisplay();
   oled.setTextSize(1);
   oled.setTextColor(WHITE);
@@ -29,7 +30,7 @@ void CancelDistress_setup() {
 void CancelDistress_loop() {
   if (!isRescuer) {
     broadcastCancel();
-    delay(2000);
+    delay(1000);
     // Ending should be back to menu
     changeProgramState(DEFAULT_MENU);
   }
