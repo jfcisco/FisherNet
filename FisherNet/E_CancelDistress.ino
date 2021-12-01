@@ -1,6 +1,4 @@
 // This code covers Sending Distress Cancellation and Receiving 
-bool didCancel = false;
-
 void CancelDistress_setup() {
   oled.clearDisplay();
   oled.setTextSize(1);
@@ -32,7 +30,6 @@ void CancelDistress_loop() {
   if (!isRescuer) {
     broadcastCancel();
     delay(2000);
-    didCancel = false; // change back to false;
     // Ending should be back to menu
     changeProgramState(DEFAULT_MENU);
   }
