@@ -1,5 +1,5 @@
 /**
- * FisherNet v2.2 - Ali's Edits
+ * FisherNet v3.0 - Hito
  * November 27, 2021
  * 
  * In fulfillment of the final project requirement
@@ -20,9 +20,9 @@
 // Device Setup
 // =============
 //  **IMPORTANT!!** Uncomment the device you are using
-#define LILYGO
-// #define EGIZMO
-#define DEBUG_MODE
+// #define LILYGO
+#define EGIZMO 
+// #define DEBUG_MODE
 
 #include "PinAssignments.h"
 
@@ -241,7 +241,8 @@ void setupState(ProgramState state) {
       break;
     // ACS: Added to handle distress cancellation
     case CANCEL_DISTRESS:
-      CancelDistress_setup();   
+      CancelDistress_setup();
+      break;
   }
 }
 
