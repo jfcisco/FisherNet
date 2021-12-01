@@ -113,6 +113,18 @@ void showRescueeMenu() {
   }
 }
 
+// ACS: Moved here from A_DefaultMenu
+void cancelmessage() {
+  oled.clearDisplay(); // clear display
+  delay(100); // wait for initializing
+  oled.setTextSize(1);          // text size
+  oled.setTextColor(WHITE);     // text color
+  oled.setCursor(0, 10);        // position to display
+  oled.println("Stopping the distress signal.");
+  oled.println("\nReturning to main menu.");
+  oled.display();
+}
+
 void displayLastResponseInfo(DistressResponse res) {
   // Assumption: Only data of last responder will appear
   oled.setCursor(40, 30);
