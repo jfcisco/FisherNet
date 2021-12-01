@@ -8,23 +8,33 @@ void CancelDistress_setup() {
   // Add click handlers - only for the confirmed Rescuer device(s) that need(s) to acknowledge it
   button1.attachClick(doNothing);         // They have to long press to acknowledge
   button1.attachDoubleClick(doNothing);   // They have to long press to acknowledge
-  button1.attachLongPressStart(acknowledgeCancellation);
-  button1.setPressTicks(300); //time to distinguish click vs long press
-  button1.setClickTicks(500); //time to distinguish click vs double click
+  button1.attachLongPressStart(acknowledgeCancellation); 
+  button1.setPressTicks(GENERAL_PRESS_TICKS);
+  button1.setClickTicks(GENERAL_CLICK_TICKS);
   
   button2.attachClick(doNothing);
   button2.attachDoubleClick(doNothing);
-  button2.attachLongPressStart(doNothing);
+  button2.attachLongPressStart(acknowledgeCancellation);
+  button2.setPressTicks(GENERAL_PRESS_TICKS);
+  button2.setClickTicks(GENERAL_CLICK_TICKS);
+  
   button3.attachClick(doNothing);
   button3.attachDoubleClick(doNothing);
-  button3.attachLongPressStart(doNothing);
+  button3.attachLongPressStart(acknowledgeCancellation);
+  button3.setPressTicks(GENERAL_PRESS_TICKS);
+  button3.setClickTicks(GENERAL_CLICK_TICKS);
+  
   button4.attachClick(doNothing);
   button4.attachDoubleClick(doNothing);
-  button4.attachLongPressStart(doNothing);
+  button4.attachLongPressStart(acknowledgeCancellation);
+  button4.setPressTicks(GENERAL_PRESS_TICKS);
+  button4.setClickTicks(GENERAL_CLICK_TICKS);
+  
   button5.attachClick(doNothing);
   button5.attachDoubleClick(doNothing);
-  button5.attachLongPressStart(doNothing);
-  
+  button5.attachLongPressStart(acknowledgeCancellation);
+  button5.setPressTicks(GENERAL_PRESS_TICKS);
+  button5.setClickTicks(GENERAL_CLICK_TICKS);
 }
 
 void CancelDistress_loop() {
@@ -40,7 +50,7 @@ void CancelDistress_loop() {
     oled.println("DISTRESS CANCELLATION received");
     oled.print("from BOAT ");
     oled.print(distData.address);
-    oled.println("\nLONG PRESS BTN 1");
+    oled.println("\nLONG PRESS a BTN");
     oled.println("to acknowledge.");
     oled.display();
   }
