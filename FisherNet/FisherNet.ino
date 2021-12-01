@@ -199,9 +199,8 @@ void updateGps() {
     Serial.println("ERROR: not getting any GPS data!");
     // dump the stream to Serial
     Serial.println("GPS stream dump:");
-    while (true) // infinite loop
-      if (gpsSerial.available() > 0) // any data coming in?
-        Serial.write(gpsSerial.read());
+    if (gpsSerial.available() > 0) // any data coming in?
+      Serial.write(gpsSerial.read());
   }
   else if (millis() - lastGpsLatLongPrint > 5000) {
     lastGpsLatLongPrint = millis();
