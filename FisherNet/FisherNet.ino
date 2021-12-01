@@ -149,9 +149,17 @@ void setupDevice() {
   Serial.println("Device Setup Success");
   oled.println("Device Setup Success");
   
-  oled.setTextSize(2);
   oled.println("Loading...");
   oled.display();
+  delay(2000);
+  // ACS: Display program name (actually, it's just fluff)
+  oled.clearDisplay();
+  oled.setCursor(0, 20);
+  oled.setTextSize(2);
+  oled.println("FisherNET");
+  oled.setTextSize(1);
+  oled.println("(version 2.1 GG)"); // ACS: Updated to 2.1. Can I suggest "Hito"? Some suggestions here: 
+  oled.display();                   // ACS: https://www.tagaloglang.com/fish-isda/
   delay(2000);
 }
 
