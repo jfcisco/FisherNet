@@ -81,7 +81,6 @@ ProgramState;
 // =================
 // Main Program
 // =================
-
 ProgramState currentState = DEFAULT_MENU;
 AlertLevel currentAlertLevel;
 DistressSignal receivedSignal;
@@ -158,8 +157,8 @@ void setupDevice() {
   oled.setTextSize(2);
   oled.println("FisherNET");
   oled.setTextSize(1);
-  oled.println("(version 2.1 GG)"); // ACS: Updated to 2.1. Can I suggest "Hito"? Some suggestions here: 
-  oled.display();                   // ACS: https://www.tagaloglang.com/fish-isda/
+  oled.println("(version 3.0 Hito)");
+  oled.display();
   delay(2000);
 }
 
