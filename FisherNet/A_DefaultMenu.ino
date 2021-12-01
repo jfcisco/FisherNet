@@ -45,9 +45,10 @@ void DefaultMenu_loop() {
   if (distRec) {
     receivedSignal = mesh.getDistressSignal();
     // Set distress signal variable to received signal data
-    // Change state to RESCUER_MENU
-    changeProgramState(RESCUER_MENU);
-  }
+    // ACS: Check first if distress signal is a cancellation based on its cancelFlag
+    if (!receivedSignal.cancelFlag) {
+      changeProgramState(RESCUER_MENU);
+    }
 }
 
 //MENU FUNCTIONS
