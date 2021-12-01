@@ -32,9 +32,10 @@ void handleConfirm() {
 
 //LONG PRESS FUNCTIONS
 void handleCancel() {
+  isRescuer = false;
   cancelmessage();
   delay(2000);
-  changeProgramState(DEFAULT_MENU);
+  changeProgramState(CANCEL_DISTRESS);
 }
 
 void DistressSignal_loop() {
@@ -43,9 +44,10 @@ void DistressSignal_loop() {
   unsigned long currentTime = millis();
   if (currentTime - timeLastSignalSent >= DISTRESS_SIGNAL_INTERVAL || timeLastSignalSent == 0)
   {
-    // Retrieve data to be sent (e.g., GPS, Alert Level)
+    // Retrieve data to be sent (e.g., GPS, Alert Level, cancelFlag)
     float gpsLat;
     float gpsLong;
+    bool cancelFlag = false;
     // Check if GPS data is valid
     if (gps.location.isValid())
     {
@@ -62,7 +64,7 @@ void DistressSignal_loop() {
     }
 
     // Broadcast a distress signal
-    if (mesh.sendDistressSignal(gpsLat, gpsLong, currentAlertLevel))
+    if (mesh.sendDistressSignal(gpsLat, gpsLong, currentAlertLevel, cancelFlag))
     {
       // Print debugging
       Serial.printf("Distress signal sent at %lu\n", currentTime);
@@ -70,19 +72,18 @@ void DistressSignal_loop() {
     }
   }
 
-  // While we are also in distress, listen for any distress reponse for us
-  if (mesh.listenForDistressResponse())
-  {
-    lastResponse = mesh.getResponse();
-    receivedResponse = true;
-
-    Serial.println("Received response");
-    Serial.printf("Responder Number: %u\n", lastResponse.address);
-    Serial.printf("GPS Lat: %f\n", lastResponse.address);
-    Serial.printf("GPS Long: %f\n", lastResponse.address);
-  }
-
-  showRescueeMenu();
+  // While we are also in distress, listen for any distress reponse for us, unless distress has been cancelled
+    if (mesh.listenForDistressResponse())
+    {
+      lastResponse = mesh.getResponse();
+      receivedResponse = true;
+  
+      Serial.println("Received response");
+      Serial.printf("Responder Number: %u\n", lastResponse.address);
+      Serial.printf("GPS Lat: %f\n", lastResponse.address);
+      Serial.printf("GPS Long: %f\n", lastResponse.address);
+    }
+    showRescueeMenu();
 }
 
 void showRescueeMenu() {
