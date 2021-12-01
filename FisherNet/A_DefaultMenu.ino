@@ -1,13 +1,15 @@
 // This code displays the default screen showing the MENU on the OLED for all types of devices.
 
-bool distRec; //rescuer - distress signal received
+bool distRec;     //rescuer - distress signal received
+bool distressSelected;  // flag to switch to IN_DISTRESS state
 
 // Declare variable for the slideshow menu
 byte optionSelected; 
 
 void DefaultMenu_setup() {
   // Initialize optionSelected to 0
-  optionSelected = 0; 
+  optionSelected = 0;
+  distressSelected = false;
   
   //Display Main Menu Slideshow Version
   mainMenu();
@@ -57,8 +59,14 @@ void DefaultMenu_loop() {
       currentAlertLevel = ALERT_GENERAL;
       break;
   }
+  
   oled.display();
 
+  // Switch to "In Distress" if the user selected to broadcast a distress signal
+  if (distressSelected) {
+    changeProgramState(IN_DISTRESS);
+  }
+  
   // While the menu is showing, keep listening for distress signal
   distRec = mesh.listenForDistressSignal();
   if (distRec) {
@@ -72,8 +80,10 @@ void DefaultMenu_loop() {
 }
 
 // ACS: DOUBLE CLICK/LONG PRESS - Confirm selection
-void confirmClick() {
-  changeProgramState(IN_DISTRESS);
+void confirmClick(byte option) {
+  optionSelected = option;
+  distressSelected = true;
+  
 }
 
 //MENU FUNCTIONS
@@ -111,40 +121,60 @@ void DefaultMenu_setupButtons() {
   });
   // ACS: IDK if it matters whether they double click or long press
   // ACS: If it does, then we can just create an error handler, the doNothing function, or create a new function altogether :)
-  button1.attachDoubleClick(confirmClick);
-  button1.attachLongPressStart(confirmClick);
+  button1.attachDoubleClick([]() {
+    confirmClick(0);    
+  });
+  button1.attachLongPressStart([]() {
+    confirmClick(0);    
+  });
   button1.setPressTicks(GENERAL_PRESS_TICKS);
   button1.setClickTicks(GENERAL_CLICK_TICKS); 
 
   button2.attachClick([]() {
     optionSelected = 1;
   });
-  button2.attachDoubleClick(confirmClick);
-  button2.attachLongPressStart(confirmClick);
+  button2.attachDoubleClick([]() {
+    confirmClick(1);    
+  });
+  button2.attachLongPressStart([]() {
+    confirmClick(1);    
+  });
   button2.setPressTicks(GENERAL_PRESS_TICKS);
   button2.setClickTicks(GENERAL_CLICK_TICKS); 
 
   button3.attachClick([]() {
     optionSelected = 2;
   });
-  button3.attachDoubleClick(confirmClick);
-  button3.attachLongPressStart(confirmClick);
+  button3.attachDoubleClick([]() {
+    confirmClick(2);    
+  });
+  button3.attachLongPressStart([]() {
+    confirmClick(2);    
+  });
   button3.setPressTicks(GENERAL_PRESS_TICKS);
   button3.setClickTicks(GENERAL_CLICK_TICKS);
 
   button4.attachClick([]() {
     optionSelected = 3;
   });
-  button4.attachDoubleClick(confirmClick);
-  button4.attachLongPressStart(confirmClick);
+  button4.attachDoubleClick([]() {
+    confirmClick(3);
+  });
+  button4.attachLongPressStart([]() {
+    confirmClick(3);
+  });
   button4.setPressTicks(GENERAL_PRESS_TICKS);
   button4.setClickTicks(GENERAL_CLICK_TICKS); 
 
   button5.attachClick([]() {
     optionSelected = 4;
   });
-  button5.attachDoubleClick(confirmClick);
-  button5.attachLongPressStart(confirmClick);
+  button5.attachDoubleClick([]() {
+    confirmClick(4);
+  });
+  button5.attachLongPressStart([]() {
+    confirmClick(4);
+  });
   button5.setPressTicks(GENERAL_PRESS_TICKS);
   button5.setClickTicks(GENERAL_CLICK_TICKS);
 }
