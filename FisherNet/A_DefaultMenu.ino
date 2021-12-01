@@ -146,5 +146,5 @@ void DefaultMenu_setupButtons() {
   button5.attachDoubleClick(confirmClick);
   button5.attachLongPressStart(confirmClick);
   button5.setPressTicks(GENERAL_PRESS_TICKS);
-  button5.setClickTicks(GENERAL_CLICK_TICKS);  
+  button5.setClickTicks(GENERAL_CLICK_TICKS);
 }
