@@ -15,14 +15,7 @@ void DistressSignal_setup(AlertLevel al) {
   oled.setTextColor(WHITE);
 
   // Setup button click code
-  OneButton buttons[] = {button1, button2, button3, button4, button5};
-  for (int i = 0; i < 5; i++) {                       // ACS: 5 represents the number of buttons
-    buttons[i].attachClick(doNothing);                // ACS: Does the same thing as handleClick, but
-    buttons[i].attachDoubleClick(handleConfirm);      // maybe this will later on serve anothe purpose? TBD.
-    buttons[i].attachLongPressStart(handleCancel);
-    buttons[i].setPressTicks(300); //time to distinguish click vs long press
-    buttons[i].setClickTicks(500); //time to distinguish click vs double click
-  }
+  DistressSignal_setupButtons();
 }
 
 void handleConfirm() {
@@ -171,4 +164,27 @@ void drawBeamingCircle(int phase)
   oled.setTextSize(2);
   oled.print("SOS");
   oled.print(currentAlertLevel + 1, DEC);
+}
+
+// Setup the button functions for this state
+void DistressSignal_setupButtons() {
+  button1.attachClick(doNothing);
+  button1.attachDoubleClick(handleConfirm);
+  button1.attachLongPressStart(handleCancel);
+
+  button2.attachClick(doNothing);
+  button2.attachDoubleClick(handleConfirm);
+  button2.attachLongPressStart(handleCancel);
+  
+  button3.attachClick(doNothing);
+  button3.attachDoubleClick(handleConfirm);
+  button3.attachLongPressStart(handleCancel);
+  
+  button4.attachClick(doNothing);
+  button4.attachDoubleClick(handleConfirm);
+  button4.attachLongPressStart(handleCancel);
+  
+  button5.attachClick(doNothing);
+  button5.attachDoubleClick(handleConfirm);
+  button5.attachLongPressStart(handleCancel);
 }
