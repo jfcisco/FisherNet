@@ -1,5 +1,5 @@
 /**
- * FisherNet v2.2
+ * FisherNet v2.2 - Ali's Edits
  * November 27, 2021
  * 
  * In fulfillment of the final project requirement
@@ -46,8 +46,8 @@ uint8_t getAddress(); // Definition in Z_Preferences
 float getFrequency();
 
 // **IMPORTANT!!**
-uint8_t NODE_ADDRESS = getAddress(); // IMPORTANT: NODE_ADDRESS should be unique per device
-float LORA_FREQUENCY = getFrequency(); // Frequency in MHz. Different for SG!
+uint8_t NODE_ADDRESS = getAddress();    // IMPORTANT: NODE_ADDRESS should be unique per device
+float LORA_FREQUENCY = getFrequency();  // Frequency in MHz. Different for SG!
 
 // Setup a new OneButton pins
 OneButton button1(BTN_1, true);
@@ -74,7 +74,7 @@ typedef enum {
   DEFAULT_MENU,
   IN_DISTRESS,
   RESCUER_MENU,
-  RESCUE_MODE
+  CANCEL_DISTRESS // ACS: Added to handle distress cancellation
 }
 ProgramState;
 
@@ -85,8 +85,9 @@ ProgramState;
 ProgramState currentState = DEFAULT_MENU;
 AlertLevel currentAlertLevel;
 DistressSignal receivedSignal;
-
-// void DistressSignal_setup(AlertLevel al);
+// ACS: Added bool variables to handle distress cancellation
+bool isRescuer;
+bool cancelFlag = false;
 
 void setup() {
   setupDevice();
@@ -110,6 +111,10 @@ void loop() {
     case RESCUER_MENU:
       Rescuer_loop();
       break;
+    // ACS: Added to handle distress cancellation
+    case CANCEL_DISTRESS:
+      CancelDistress_loop();
+      break;    
   }
 
   // Get any user input from the Serial connection
@@ -144,9 +149,17 @@ void setupDevice() {
   Serial.println("Device Setup Success");
   oled.println("Device Setup Success");
   
-  oled.setTextSize(2);
   oled.println("Loading...");
   oled.display();
+  delay(2000);
+  // ACS: Display program name (actually, it's just fluff)
+  oled.clearDisplay();
+  oled.setCursor(0, 20);
+  oled.setTextSize(2);
+  oled.println("FisherNET");
+  oled.setTextSize(1);
+  oled.println("(version 2.1 GG)"); // ACS: Updated to 2.1. Can I suggest "Hito"? Some suggestions here: 
+  oled.display();                   // ACS: https://www.tagaloglang.com/fish-isda/
   delay(2000);
 }
 
@@ -226,6 +239,9 @@ void setupState(ProgramState state) {
     case RESCUER_MENU:
       Rescuer_setup(receivedSignal);
       break;
+    // ACS: Added to handle distress cancellation
+    case CANCEL_DISTRESS:
+      CancelDistress_setup();   
   }
 }
 

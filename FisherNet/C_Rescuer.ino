@@ -5,7 +5,7 @@ bool gpsVal = false;
 DistressSignal distData;
 unsigned long timeLastResponseSent;
 
-//global situaion variables
+//global situation variables
 bool distIgn; //rescuer - distress signal ignored
 bool distAcc; //rescuer - distress signal accepted
 int situation;
@@ -32,7 +32,7 @@ Situation;
  *  5 distress signal ignored
  */
 
- void Rescuer_setup(DistressSignal distress) {
+void Rescuer_setup(DistressSignal distress) {
   oled.clearDisplay();
   oled.setTextSize(1);
   oled.setTextColor(WHITE);
@@ -44,6 +44,8 @@ Situation;
   distRec = true; //rescuer - distress signal received
   distIgn = false; //rescuer - distress signal ignored
   distAcc = false; //rescuer - distress signal accepted
+
+  // Initial state is rescuer menu
   situation = 3;
 
   // Add click handlers
@@ -93,40 +95,54 @@ void Rescuer_loop() {
     case 2:
       break;
     case 3:
-      //3 distress received - those in distress can't be rescuers
-      //display rescuee info
-      str[0] = "BOAT " + String(distData.address) + " DISTRESS";
+      // 3 distress received - those in distress can't be rescuers
+      // Check if received distress is a cancellation or not
+      if (!distData.cancelFlag) { // unnecessary
 
-      // Check if GPS data from the resucee is valid
-      if (isValidGps(distData.gpsLat, distData.gpsLong)) {
-        str[1] = "LAT: " + String(distData.gpsLat);
-        str[2] = "LONG: " + String(distData.gpsLong);
-
-        // Calculate distance if both rescuee and rescuer GPS data is valid
-        if (gpsVal) {
-          float distanceInMeters = gps.distanceBetween(currLat, currLong, distData.gpsLat, distData.gpsLong);
-          str[3] = "DIS: " + String(distanceInMeters, 2) + " m";
+        str[0] = "BOAT " + String(distData.address) + " DISTRESS";
+  
+        // Check if GPS data from the resucee is valid
+        if (isValidGps(distData.gpsLat, distData.gpsLong)) {
+          str[1] = "LAT: " + String(distData.gpsLat);
+          str[2] = "LONG: " + String(distData.gpsLong);
+  
+          // Calculate distance if both rescuee and rescuer GPS data is valid
+          if (gpsVal) {
+            float distanceInMeters = gps.distanceBetween(currLat, currLong, distData.gpsLat, distData.gpsLong);
+            str[3] = "DIS: " + String(distanceInMeters, 2) + " m";
+          }
+          // If our GPS is invalid, show not available
+          else {
+            str[3] = "DIS: Not Available";
+          }
         }
-        // If our GPS is invalid, show not available
         else {
+          // Rescuee's GPS data is invalid
+          str[1] = "LAT: Not Available";
+          str[2] = "LONG: Not Available";
           str[3] = "DIS: Not Available";
         }
-      }
+        
+        str[4] = "AL " + String(distData.alertLevel + 1);
+        str[5] = " ";
+        str[6] = "BTN 1 RESCUE";
+        str[7] = "BTN 2 IGNORE";
+  
+        showInOled(str);
+      } 
       else {
-        // Rescuee's GPS data is invalid
-        str[1] = "LAT: Not Available";
-        str[2] = "LONG: Not Available";
-        str[3] = "DIS: Not Available";
+        receiveCancelBroadcast();
       }
-      
-      str[4] = "AL " + String(distData.alertLevel + 1);
-      str[5] = " ";
-      str[6] = "BTN 1 RESCUE";
-      str[7] = "BTN 2 IGNORE";
 
-      // Add a listen here to allow the node to still pass on messages
-      mesh.listenForDistressSignal();
-      showInOled(str);
+      // Continuously listen for updates about the distressed vessel
+      distRec = mesh.listenForDistressSignal();
+      if(distRec) {
+        DistressSignal distDataTemp = mesh.getDistressSignal();
+        if (distDataTemp.cancelFlag) {
+          receiveCancelBroadcast();
+        }
+        else distData = distDataTemp;
+      }
       break;
     case 4:
       //4 distress accepted - to the rescue mode
@@ -139,7 +155,13 @@ void Rescuer_loop() {
         //get distress signal data
         DistressSignal distDataTemp = mesh.getDistressSignal();
         if(distDataTemp.address == distData.address){
-          distData = distDataTemp;
+          // If it's a cancellation, then display cancellation message then go back to default menu.  
+          // No response needed.
+          if (distDataTemp.cancelFlag) {
+            isRescuer = true;
+            changeProgramState(CANCEL_DISTRESS);
+          }
+          else distData = distDataTemp;
         }
       }
       
@@ -177,8 +199,8 @@ void Rescuer_loop() {
         timeLastResponseSent = currentRescuerTime;
         distAcc = mesh.sendDistressResponse(distData.address, currLat, currLong);
       }
-      
       break;
+    
     case 5:
       //5 distress signal ignored
       //same as default but not listening for distress signal
