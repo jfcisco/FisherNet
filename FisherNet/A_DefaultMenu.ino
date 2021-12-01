@@ -2,8 +2,7 @@
 
 bool distRec; //rescuer - distress signal received
 
-// ALI's EDITS: SINGLE BUTTON EDITION
-// Declare Variable for the slideshow menu
+// Declare variable for the slideshow menu
 byte optionSelected; 
 
 void DefaultMenu_setup() {
@@ -13,14 +12,8 @@ void DefaultMenu_setup() {
   //Display Main Menu Slideshow Version
   mainMenu();
 
-  //call BTN_1 Click functions
-  button1.attachClick(optionSelection);
-  // ACS: IDK if it matters whether they double click or long press
-  // ACS: If it does, then we can just create an error handler, the doNothing function, or create a new function altogether :)
-  button1.attachDoubleClick(confirmClick);
-  button1.attachLongPressStart(confirmClick);
-  button1.setPressTicks(300); //time to distinguish click vs long press
-  button1.setClickTicks(500); //time to distinguish click vs double click
+  // Setup buttons for this state
+  DefaultMenu_setupButtons();
 }
 
 void DefaultMenu_loop() {
@@ -33,6 +26,12 @@ void DefaultMenu_loop() {
   switch(optionSelected) {   
     // ACS: Maybe we can add a case 0 which is the first screen showing Boat Number, GPS Long, GPS Lat, plus some instructions (click/dbl click/long press).
     // ACS: Made the text bigger because of my poor eyesight. >_<
+    case 0:
+      oled.print(optionSelected+1);
+      oled.setTextSize(2);
+      oled.println("\nTechnical\nTeknikal");
+      currentAlertLevel = ALERT_TECHNICAL;
+      break;   
     case 1:
       currentAlertLevel = ALERT_HOSTILE;
       oled.print(optionSelected+1);
@@ -57,12 +56,6 @@ void DefaultMenu_loop() {
       oled.println("\nOthers\nIba pa");
       currentAlertLevel = ALERT_GENERAL;
       break;
-    default:
-      oled.print(optionSelected+1);
-      oled.setTextSize(2);
-      oled.println("\nTechnical\nTeknikal");
-      currentAlertLevel = ALERT_TECHNICAL;
-      break;   
   }
   oled.display();
 
@@ -78,16 +71,6 @@ void DefaultMenu_loop() {
   }
 }
 
-// ACS: CLICK - Move along the menus
-void optionSelection() {
-  if (optionSelected > 3) {  
-    optionSelected=0;
-  }
-  else {
-    optionSelected++;
-  }
-}
-
 // ACS: DOUBLE CLICK/LONG PRESS - Confirm selection
 void confirmClick() {
   changeProgramState(IN_DISTRESS);
@@ -100,17 +83,6 @@ void mainMenu() {
   oled.setTextSize(1);          // text size
   oled.setTextColor(WHITE);     // text color
   oled.setCursor(0, 0);         // position to display
-/* ORIGINAL CODE
-  //print menu
-  oled.print("Your Boat No: ");  // changed from "Address" for users' better understanding
-  oled.print(mesh.getAddress());
-  oled.println("\n\nMENU: ");
-  oled.println(" 1=Technical/Teknikal");
-  oled.println(" 2=Hostile/Pirata");
-  oled.println(" 3=Sinking/Lumulubog");
-  oled.println(" 4=Medical/Medikal");
-  oled.println(" 5=Others/Iba pa");
-*/
   oled.display();
 }
 
@@ -125,36 +97,54 @@ void errormessage() {
   oled.display();
 }
 
-/* ORIGINAL CODE
-//CLICK functions (ACS: OK, maybe this part isn't original code, just made it a bit more efficient >_<)
-void buttonSelect() {
-  mainmenu();   //wake screen
-}
+// Time to distinguish click vs long press
+#define GENERAL_PRESS_TICKS 300
 
-//DOUBLE CLICK FUNCTIONS
-void BTN_1_confirm() {
-  currentAlertLevel = ALERT_TECHNICAL;
-  changeProgramState(IN_DISTRESS);
-}
+// Time to distinguish click vs double click
+#define GENERAL_CLICK_TICKS 500
 
-void BTN_2_confirm() {
-  currentAlertLevel = ALERT_HOSTILE;
-  changeProgramState(IN_DISTRESS);
-}
+// Subroutine to setup the buttons in this state
+void DefaultMenu_setupButtons() {
+  // Using lambda/anonymous function to set optionSelected
+  button1.attachClick([]() {
+    optionSelected = 0;
+  });
+  // ACS: IDK if it matters whether they double click or long press
+  // ACS: If it does, then we can just create an error handler, the doNothing function, or create a new function altogether :)
+  button1.attachDoubleClick(confirmClick);
+  button1.attachLongPressStart(confirmClick);
+  button1.setPressTicks(GENERAL_PRESS_TICKS);
+  button1.setClickTicks(GENERAL_CLICK_TICKS); 
 
-void BTN_3_confirm() {
-  currentAlertLevel = ALERT_SINKING;
-  changeProgramState(IN_DISTRESS);
-}
+  button2.attachClick([]() {
+    optionSelected = 1;
+  });
+  button2.attachDoubleClick(confirmClick);
+  button2.attachLongPressStart(confirmClick);
+  button2.setPressTicks(GENERAL_PRESS_TICKS);
+  button2.setClickTicks(GENERAL_CLICK_TICKS); 
 
-void BTN_4_confirm() {
-  currentAlertLevel = ALERT_MEDICAL;
-  changeProgramState(IN_DISTRESS);
-}
+  button3.attachClick([]() {
+    optionSelected = 2;
+  });
+  button3.attachDoubleClick(confirmClick);
+  button3.attachLongPressStart(confirmClick);
+  button3.setPressTicks(GENERAL_PRESS_TICKS);
+  button3.setClickTicks(GENERAL_CLICK_TICKS);
 
-void BTN_5_confirm() {
-  currentAlertLevel = ALERT_GENERAL;
-  changeProgramState(IN_DISTRESS);
-}
+  button4.attachClick([]() {
+    optionSelected = 3;
+  });
+  button4.attachDoubleClick(confirmClick);
+  button4.attachLongPressStart(confirmClick);
+  button4.setPressTicks(GENERAL_PRESS_TICKS);
+  button4.setClickTicks(GENERAL_CLICK_TICKS); 
 
-END OF ORIGINAL CODE */
+  button5.attachClick([]() {
+    optionSelected = 4;
+  });
+  button5.attachDoubleClick(confirmClick);
+  button5.attachLongPressStart(confirmClick);
+  button5.setPressTicks(GENERAL_PRESS_TICKS);
+  button5.setClickTicks(GENERAL_CLICK_TICKS);  
+}
