@@ -25,9 +25,8 @@ void handleConfirm() {
 
 //LONG PRESS FUNCTIONS
 void handleCancel() {
-  isRescuer = false;
   cancelmessage();
-  delay(2000);
+  isRescuer = false;
   changeProgramState(CANCEL_DISTRESS);
 }
 
@@ -66,17 +65,17 @@ void DistressSignal_loop() {
   }
 
   // While we are also in distress, listen for any distress reponse for us, unless distress has been cancelled
-    if (mesh.listenForDistressResponse())
-    {
-      lastResponse = mesh.getResponse();
-      receivedResponse = true;
-  
-      Serial.println("Received response");
-      Serial.printf("Responder Number: %u\n", lastResponse.address);
-      Serial.printf("GPS Lat: %f\n", lastResponse.address);
-      Serial.printf("GPS Long: %f\n", lastResponse.address);
-    }
-    showRescueeMenu();
+  if (mesh.listenForDistressResponse())
+  {
+    lastResponse = mesh.getResponse();
+    receivedResponse = true;
+
+    Serial.println("Received response");
+    Serial.printf("Responder Number: %u\n", lastResponse.address);
+    Serial.printf("GPS Lat: %f\n", lastResponse.address);
+    Serial.printf("GPS Long: %f\n", lastResponse.address);
+  }
+  showRescueeMenu();
 }
 
 void showRescueeMenu() {
