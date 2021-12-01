@@ -9,21 +9,7 @@ unsigned long timeLastResponseSent;
 bool distIgn; //rescuer - distress signal ignored
 bool distAcc; //rescuer - distress signal accepted
 int situation;
-// Situation could have been an enum
-/*
-Something like:
-typedef enum {
-  DEFAULT_STATE,
-  DISTRESS_NO_RESPONSE,
-  DISTRESS_WITH_RESPONSE,
-  DISTRESS_RECEIVED,
-  DISTRESS_ACCEPTED,
-  DISTRESS_IGNORED
-}
-Situation;
-*/
-
-/*
+/* Situation variable meaning:
  *  0 default - not in distress and no distress received
  *  1 in distress no response
  *  2 in distress with response
@@ -39,7 +25,23 @@ void Rescuer_setup(DistressSignal distress) {
   
   // Initialize variables
   distData = distress;
-  // distData = dummyDistress;
+
+  /* Dummy distress signal for UI testing:
+  DistressSignal dummyDistress = {
+    {
+      DISTRESS_SIGNAL
+    },
+    255,
+    14.1234567,
+    121.9876543,
+    ALERT_GENERAL,
+    2,
+    false
+  };
+  
+  distData = dummyDistress;
+  */
+  
   timeLastResponseSent = 0;
   distRec = true; //rescuer - distress signal received
   distIgn = false; //rescuer - distress signal ignored
@@ -103,8 +105,8 @@ void Rescuer_loop() {
   
         // Check if GPS data from the resucee is valid
         if (isValidGps(distData.gpsLat, distData.gpsLong)) {
-          str[1] = "LAT: " + String(distData.gpsLat);
-          str[2] = "LONG: " + String(distData.gpsLong);
+          str[1] = "LAT: " + String(distData.gpsLat, 5);
+          str[2] = "LONG: " + String(distData.gpsLong, 5);
   
           // Calculate distance if both rescuee and rescuer GPS data is valid
           if (gpsVal) {
@@ -166,8 +168,8 @@ void Rescuer_loop() {
       }
       
       str[0] = "GOTO BOAT " + String(distData.address);
-      str[1] = "LAT: " + String(distData.gpsLat);
-      str[2] = "LONG: " + String(distData.gpsLong);
+      str[1] = "LAT: " + String(distData.gpsLat, 5);
+      str[2] = "LONG: " + String(distData.gpsLong, 5);
 
       if (isValidGps(distData.gpsLat, distData.gpsLong)) {
         str[1] = "LAT: " + String(distData.gpsLat);
@@ -176,7 +178,7 @@ void Rescuer_loop() {
         // Calculate distance if both rescuee and rescuer GPS data is valid
         if (gpsVal) {
           float distanceInMeters = gps.distanceBetween(currLat, currLong, distData.gpsLat, distData.gpsLong);
-          str[3] = "DIS: " + String(distanceInMeters, 2);
+          str[3] = "DIS: " + String(distanceInMeters, 2) + " m";
         }
         else {
           str[3] = "DIS: Not Available";
