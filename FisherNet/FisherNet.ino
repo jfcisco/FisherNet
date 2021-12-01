@@ -135,6 +135,7 @@ void setupDevice() {
   oled.clearDisplay();
   oled.setTextSize(1);
   oled.setTextColor(WHITE);
+  oled.setCursor(0, 0);
 
   NODE_ADDRESS = getAddress();
   LORA_FREQUENCY = getFrequency();
