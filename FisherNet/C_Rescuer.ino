@@ -6,7 +6,6 @@ DistressSignal distData;
 unsigned long timeLastResponseSent;
 
 //global situation variables
-bool distIgn; //rescuer - distress signal ignored
 bool distAcc; //rescuer - distress signal accepted
 int situation;
 /* Situation variable meaning:
@@ -266,6 +265,7 @@ void handleButton2Click() {
       //str[7] = "Press Button 2 to not Rescue";
       distIgn = true;
       distAcc = false;
+      timeLastListened = millis();
 
       cancelRescueMessage();
       delay(2000);
