@@ -76,11 +76,9 @@ void DefaultMenu_loop() {
   }
   
   if (distIgn == false) {
-    distRec = mesh.listenForDistressSignal();  
+    distRec = mesh.listenForDistressSignal();
   } else {
-    Serial.println("Set to ignore distress signals ");
-    Serial.print(30000 - (currentTime - timeLastListened), DEC);
-    Serial.println(" ms left");
+    mesh.listenForDistressSignal();
   }
   
   if (distRec) {
