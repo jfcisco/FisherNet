@@ -1,3 +1,4 @@
+// This code defines how to SEND distress signal from Distressed Boats
 #define DISTRESS_SIGNAL_INTERVAL 30000
 
 unsigned long timeLastSignalSent;
@@ -14,44 +15,7 @@ void DistressSignal_setup(AlertLevel al) {
   oled.setTextColor(WHITE);
 
   // Setup button click code
-  //call BTN_1 Click functions
-  button1.attachClick(handleClick);
-  button1.attachDoubleClick(handleConfirm);
-  button1.attachLongPressStart(handleCancel);
-  button1.setPressTicks(300); //time to distinguish click vs long press
-  button1.setClickTicks(500); //time to distinguish click vs double click
-
-  //call BTN_2 Click functions
-  button2.attachClick(handleClick);
-  button2.attachDoubleClick(handleConfirm);
-  button2.attachLongPressStart(handleCancel);
-  button2.setPressTicks(300); //time to distinguish click vs long press
-  button2.setClickTicks(500); //time to distinguish click vs double click
-
-  //call BTN_3 Click functions
-  button3.attachClick(handleClick);
-  button3.attachDoubleClick(handleConfirm);
-  button3.attachLongPressStart(handleCancel);
-  button3.setPressTicks(300); //time to distinguish click vs long press
-  button3.setClickTicks(500); //time to distinguish click vs double click
-
-  //call BTN_4 Click functions
-  button4.attachClick(handleClick);
-  button4.attachDoubleClick(handleConfirm);
-  button4.attachLongPressStart(handleCancel);
-  button4.setPressTicks(300); //time to distinguish click vs long press
-  button4.setClickTicks(500); //time to distinguish click vs double click
-
-  //call BTN_5 Click functions
-  button5.attachClick(handleClick);
-  button5.attachDoubleClick(handleConfirm);
-  button5.attachLongPressStart(handleCancel);
-  button5.setPressTicks(300); //time to distinguish click vs long press
-  button5.setClickTicks(500); //time to distinguish click vs double click
-}
-
-void handleClick() {
-  return;
+  DistressSignal_setupButtons();
 }
 
 void handleConfirm() {
@@ -62,8 +26,8 @@ void handleConfirm() {
 //LONG PRESS FUNCTIONS
 void handleCancel() {
   cancelmessage();
-  delay(2000);
-  changeProgramState(DEFAULT_MENU);
+  isRescuer = false;
+  changeProgramState(CANCEL_DISTRESS);
 }
 
 void DistressSignal_loop() {
@@ -72,9 +36,10 @@ void DistressSignal_loop() {
   unsigned long currentTime = millis();
   if (currentTime - timeLastSignalSent >= DISTRESS_SIGNAL_INTERVAL || timeLastSignalSent == 0)
   {
-    // Retrieve data to be sent (e.g., GPS, Alert Level)
+    // Retrieve data to be sent (e.g., GPS, Alert Level, cancelFlag)
     float gpsLat;
     float gpsLong;
+    bool cancelFlag = false;
     // Check if GPS data is valid
     if (gps.location.isValid())
     {
@@ -91,7 +56,7 @@ void DistressSignal_loop() {
     }
 
     // Broadcast a distress signal
-    if (mesh.sendDistressSignal(gpsLat, gpsLong, currentAlertLevel))
+    if (mesh.sendDistressSignal(gpsLat, gpsLong, currentAlertLevel, cancelFlag))
     {
       // Print debugging
       Serial.printf("Distress signal sent at %lu\n", currentTime);
@@ -99,7 +64,7 @@ void DistressSignal_loop() {
     }
   }
 
-  // While we are also in distress, listen for any distress reponse for us
+  // While we are also in distress, listen for any distress reponse for us, unless distress has been cancelled
   if (mesh.listenForDistressResponse())
   {
     lastResponse = mesh.getResponse();
@@ -110,7 +75,6 @@ void DistressSignal_loop() {
     Serial.printf("GPS Lat: %f\n", lastResponse.address);
     Serial.printf("GPS Long: %f\n", lastResponse.address);
   }
-
   showRescueeMenu();
 }
 
@@ -140,6 +104,18 @@ void showRescueeMenu() {
     delay(2000);
     didError = false;
   }
+}
+
+// ACS: Moved here from A_DefaultMenu
+void cancelmessage() {
+  oled.clearDisplay(); // clear display
+  delay(100); // wait for initializing
+  oled.setTextSize(1);          // text size
+  oled.setTextColor(WHITE);     // text color
+  oled.setCursor(0, 10);        // position to display
+  oled.println("Stopping the distress signal.");
+  oled.println("\nReturning to main menu.");
+  oled.display();
 }
 
 void displayLastResponseInfo(DistressResponse res) {
@@ -187,4 +163,27 @@ void drawBeamingCircle(int phase)
   oled.setTextSize(2);
   oled.print("SOS");
   oled.print(currentAlertLevel + 1, DEC);
+}
+
+// Setup the button functions for this state
+void DistressSignal_setupButtons() {
+  button1.attachClick(doNothing);
+  button1.attachDoubleClick(handleConfirm);
+  button1.attachLongPressStart(handleCancel);
+
+  button2.attachClick(doNothing);
+  button2.attachDoubleClick(handleConfirm);
+  button2.attachLongPressStart(handleCancel);
+  
+  button3.attachClick(doNothing);
+  button3.attachDoubleClick(handleConfirm);
+  button3.attachLongPressStart(handleCancel);
+  
+  button4.attachClick(doNothing);
+  button4.attachDoubleClick(handleConfirm);
+  button4.attachLongPressStart(handleCancel);
+  
+  button5.attachClick(doNothing);
+  button5.attachDoubleClick(handleConfirm);
+  button5.attachLongPressStart(handleCancel);
 }
