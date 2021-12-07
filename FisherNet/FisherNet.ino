@@ -1,6 +1,6 @@
 /**
- * FisherNet v3.0 - Hito
- * November 27, 2021
+ * FisherNet v3.1 - Hito
+ * December 5, 2021
  * 
  * In fulfillment of the final project requirement
  * for CMSC 205: Data Communications and Networking
@@ -87,6 +87,10 @@ DistressSignal receivedSignal;
 // ACS: Added bool variables to handle distress cancellation
 bool isRescuer;
 bool cancelFlag = false;
+// AA: from rescuer file - distress signal ignored to go back to main menu
+bool distIgn = false; 
+//AA: for ignoring distress signals for 30 seconds
+unsigned long timeLastListened = 0;
 
 void setup() {
   setupDevice();
@@ -131,11 +135,12 @@ void setupDevice() {
   Serial.println("Beginning device setup...");
   setupOled();
   setupGps();
-  
+#ifdef EGIZMO
+  SPI.begin(LORA_SERIAL_CLOCK, LORA_CIPO, LORA_COPI, LORA_CHIP_SELECT);
+#endif
   oled.clearDisplay();
   oled.setTextSize(1);
   oled.setTextColor(WHITE);
-  oled.setCursor(0, 0);
 
   NODE_ADDRESS = getAddress();
   LORA_FREQUENCY = getFrequency();

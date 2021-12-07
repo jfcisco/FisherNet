@@ -68,7 +68,21 @@ void DefaultMenu_loop() {
   }
   
   // While the menu is showing, keep listening for distress signal
-  distRec = mesh.listenForDistressSignal();
+  //AA: unless it was previously ingored
+  unsigned long currentTime = millis();
+  // Ignore for 30 seconds
+  if (currentTime - timeLastListened >= 30000 || timeLastListened == 0){
+    distIgn = false;
+  }
+  
+  if (distIgn == false) {
+    distRec = mesh.listenForDistressSignal();  
+  } else {
+    Serial.println("Set to ignore distress signals ");
+    Serial.print(30000 - (currentTime - timeLastListened), DEC);
+    Serial.println(" ms left");
+  }
+  
   if (distRec) {
     receivedSignal = mesh.getDistressSignal();
     // Set distress signal variable to received signal data
