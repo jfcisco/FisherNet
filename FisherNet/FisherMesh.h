@@ -12,7 +12,7 @@
 #include <RH_RF95.h>
 #include <RHMesh.h>
 
-// Defines the types of alert level
+// Defines the types of alert levels
 typedef enum {
   ALERT_TECHNICAL = 0,
   ALERT_HOSTILE = 1,
@@ -22,6 +22,7 @@ typedef enum {
 }
 AlertLevel;
 
+// Possible values for msgType
 #define DISTRESS_SIGNAL 10
 #define DISTRESS_RESPONSE 20
 
@@ -38,6 +39,8 @@ typedef struct {
   float gpsLat;
   float gpsLong;
   AlertLevel alertLevel;
+  unsigned int hopsLeft;
+  bool cancelFlag;
 }
 DistressSignal;
 
@@ -49,6 +52,10 @@ typedef struct {
   float gpsLong;
 }
 DistressResponse;
+
+// Set a hop limit to optimize the flooding of the distress signal
+// Hop limit dictates how many times the distress signal should be retransmitted
+#define DISTRESS_HOP_LIMIT 5
 
 // Defines a helper class for sending and receiving data from the mesh network
 class FisherMesh {
@@ -64,7 +71,7 @@ public:
   void resetModule();
 
   // Sends a distress signal containing the passed in information
-  bool sendDistressSignal(float gpsLat, float gpsLong, AlertLevel alertLevel);
+  bool sendDistressSignal(float gpsLat, float gpsLong, AlertLevel alertLevel, bool cancelFlag);
 
   // Sends a distress response message to the given address. This is sent from point-to-point instead of broadcasted.
   bool sendDistressResponse(uint8_t address, float gpsLat, float gpsLong);
@@ -101,7 +108,7 @@ private:
 
 // Below is the C++ implementation of the methods above
 // No need to look any further unless you want to modify the code
-FisherMesh::FisherMesh(uint8_t address, float frequency = 433.0)
+FisherMesh::FisherMesh(uint8_t address, float frequency)
   : _rf95(LORA_CHIP_SELECT, LORA_INTERRUPT),
     _manager(_rf95, address),
     _frequency(frequency),
@@ -152,13 +159,15 @@ void FisherMesh::resetModule() {
 };
 
 // Sends a distress signal containing the passed in information
-bool FisherMesh::sendDistressSignal(float gpsLat, float gpsLong, AlertLevel alertLevel) {
+bool FisherMesh::sendDistressSignal(float gpsLat, float gpsLong, AlertLevel alertLevel, bool cancelFlag) {
   // Setup the distress signal struct
   _distressSignal.header.msgType = DISTRESS_SIGNAL;
   _distressSignal.address = _address;
   _distressSignal.gpsLat = gpsLat;
   _distressSignal.gpsLong = gpsLong;
   _distressSignal.alertLevel = alertLevel;
+  _distressSignal.hopsLeft = DISTRESS_HOP_LIMIT;
+  _distressSignal.cancelFlag = cancelFlag;
   
   // Copy the distress signal into a byte buffer
   // This is needed to send the data over radio
@@ -169,7 +178,7 @@ bool FisherMesh::sendDistressSignal(float gpsLat, float gpsLong, AlertLevel aler
       // Pass in the distressSignal as an array of bytes
       (uint8_t *)_buffer,
       sizeof(_distressSignal),
-      // Broadcast the signal instead of directing the signal to the 
+      // Broadcast the signal instead of directing the signal to a specific node
       RH_BROADCAST_ADDRESS) == RH_ROUTER_ERROR_NONE) {
         
         // The signal has been reliably delivered to a node.
@@ -194,24 +203,43 @@ bool FisherMesh::sendDistressResponse(uint8_t address, float gpsLat, float gpsLo
   return _manager.sendtoWait(_buffer, sizeof(_distressResponse), address) == RH_ROUTER_ERROR_NONE;
 };
     
-// Listens to distress signals  
+// Listens for distress signals  
 bool FisherMesh::listenForDistressSignal() {
   uint8_t len = sizeof(_buffer);
   uint8_t from;
   
-  if (_manager.recvfromAck(_buffer, &len, &from))
-  {
+  if (_manager.recvfromAck(_buffer, &len, &from)) {
     // We can do this because both types of signals 
     // (i.e. DistressResponse and DistressSignal) have a DistressHeader.
     DistressHeader *header = (DistressHeader *)_buffer;
     
     if (len > 1 && header->msgType == DISTRESS_SIGNAL) {
+#ifdef DEBUG_MODE
+      Serial.print("Got a distress signal from: ");
+      Serial.println(from, DEC);
+#endif
       // Cast the response into the struct
       DistressSignal *distressSignal = (DistressSignal *)header;
       _distressSignal = *distressSignal;
-    }
 
-    return true;
+      if (distressSignal->hopsLeft > 0) {
+        // Decrement the distress signal's hops
+        distressSignal->hopsLeft--;
+#ifdef DEBUG_MODE
+        Serial.print("Rebroadcasting distressSignal with hopsLeft= ");
+        Serial.println(distressSignal->hopsLeft, DEC);
+#endif
+        // Copy the distress signal to buffer as an array of bytes
+        memcpy(_buffer, distressSignal, sizeof(DistressSignal));
+        
+        // Rebroadcast the signal while mimicking the source
+        _manager.sendtoWait(  
+          (uint8_t *)_buffer,
+          sizeof(DistressSignal),
+          RH_BROADCAST_ADDRESS);
+      } 
+      return true;
+    }
   }
   return false;
 };
@@ -222,8 +250,7 @@ bool FisherMesh::listenForDistressResponse() {
   uint8_t len = sizeof(_buffer);
   uint8_t from;
   
-  if (_manager.recvfromAck(_buffer, &len, &from))
-  {
+  if (_manager.recvfromAck(_buffer, &len, &from)) {
     // We can do this because both types of signals 
     // (i.e. DistressResponse and DistressSignal) have a DistressHeader.
     DistressHeader *header = (DistressHeader *)_buffer;
@@ -232,9 +259,34 @@ bool FisherMesh::listenForDistressResponse() {
       // Cast the response into the struct
       DistressResponse *response = (DistressResponse *)header;
       _distressResponse = *response;
+      return true;
     }
+    // Case when a distressed vessel catches a distress signal from another distress vessel
+    else if (len > 1 && header->msgType == DISTRESS_SIGNAL) {
+#ifdef DEBUG_MODE
+      Serial.print("Got a distress signal from: ");
+      Serial.println(from, DEC);
+#endif
+      // Cast the response into the struct
+      DistressSignal *distressSignal = (DistressSignal *)header;
 
-    return true;
+      if (distressSignal->hopsLeft > 0) {
+        // Decrement the distress signal's hops
+        distressSignal->hopsLeft--;
+#ifdef DEBUG_MODE
+        Serial.print("Rebroadcasting distressSignal with hopsLeft= ");
+        Serial.println(distressSignal->hopsLeft, DEC);
+#endif
+        // Copy the distress signal to buffer as an array of bytes
+        memcpy(_buffer, distressSignal, sizeof(DistressSignal));
+        
+        // Rebroadcast the signal while mimicking the source
+        _manager.sendtoWait(  
+          (uint8_t *)_buffer,
+          sizeof(DistressSignal),
+          RH_BROADCAST_ADDRESS);
+      }
+    }
   }
   return false;
 };
