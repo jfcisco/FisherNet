@@ -1,6 +1,7 @@
 /**
- * FisherNet v3.1 - Hito
- * December 5, 2021
+ * FisherNet v3.2 - Hito
+ * Long Range Alpha
+ * December 12, 2021
  * 
  * In fulfillment of the final project requirement
  * for CMSC 205: Data Communications and Networking
@@ -20,8 +21,8 @@
 // Device Setup
 // =============
 //  **IMPORTANT!!** Uncomment the device you are using
-// #define LILYGO
-#define EGIZMO 
+#define LILYGO
+// #define EGIZMO 
 // #define DEBUG_MODE
 
 #include "PinAssignments.h"
