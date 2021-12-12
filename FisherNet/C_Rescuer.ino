@@ -167,12 +167,10 @@ void Rescuer_loop() {
       }
       
       str[0] = "GOTO BOAT " + String(distData.address);
-      str[1] = "LAT: " + String(distData.gpsLat, 5);
-      str[2] = "LONG: " + String(distData.gpsLong, 5);
-
+      
       if (isValidGps(distData.gpsLat, distData.gpsLong)) {
-        str[1] = "LAT: " + String(distData.gpsLat);
-        str[2] = "LONG: " + String(distData.gpsLong);
+        str[1] = "LAT: " + String(distData.gpsLat, 5);
+        str[2] = "LONG: " + String(distData.gpsLong,5 );
 
         // Calculate distance if both rescuee and rescuer GPS data is valid
         if (gpsVal) {
