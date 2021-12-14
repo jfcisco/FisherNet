@@ -81,14 +81,9 @@ void Rescuer_loop() {
   }
 
   unsigned long currentRescuerTime = millis();
-
-
   //OLED input strings
   String str[8] = {"","","","","","","",""};
   situation = getSituation();
-#ifdef DEBUG_MODE
-  // Serial.println("Situation: " + String(situation));
-#endif
   
   switch(situation){
     case 0:
@@ -98,7 +93,7 @@ void Rescuer_loop() {
     case 3:
       // 3 distress received - those in distress can't be rescuers
       // Check if received distress is a cancellation or not
-      if (!distData.cancelFlag) { // unnecessary
+      if (!distData.cancelFlag) {
 
         str[0] = "BOAT " + String(distData.address) + " DISTRESS";
   
@@ -210,11 +205,6 @@ void Rescuer_loop() {
       showInOled(str);
       break;
   } // situation switch
-
-#ifdef DEBUG_MODE
-  // Serial.print("distAcc: ");
-  // Serial.println(distAcc);
-#endif
 }
 
 // Button handlers*******
