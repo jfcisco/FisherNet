@@ -1,6 +1,5 @@
 /**
- * FisherNet v3.2 - Hito
- * Long Range Alpha
+ * FisherNet v4.0 - Maya-Maya
  * December 12, 2021
  * 
  * In fulfillment of the final project requirement
