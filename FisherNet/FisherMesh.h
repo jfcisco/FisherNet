@@ -149,31 +149,6 @@ bool FisherMesh::init(uint8_t address, float frequency) {
 
   Serial.printf("Frequency set at %f\n", _frequency);
   
-  // Set the radio transmit power and modem configuration
-#ifdef EGIZMO
-  // Ra-02 Module has a maximum transmit power of +18dBm per datasheet
-  _rf95.setTxPower(18);
-#endif
-
-#ifdef LILYGO
-  // T-Beam has a maximum transmit power of +20dBm per datasheet
-  _rf95.setTxPower(20);
-#endif
-
-  // Use one of the slow+long range configurations
-  // Reference https://www.airspayce.com/mikem/arduino/RadioHead/classRH__RF95.html#ab9605810c11c025758ea91b2813666e3
-  const RH_RF95::ModemConfigChoice modemConfig = RH_RF95::ModemConfigChoice::Bw125Cr48Sf4096;
-  
-  if (!_rf95.setModemConfig(modemConfig)) {
-    Serial.println("LoRa modem configuration failed");
-    return false;
-  }
-  Serial.println("LoRa model configuration succeeded");
-
-  // Print out modem registers to serial to verify if the modem config was successful
-  Serial.println("Configured registers for LoRa module:");
-  _rf95.printRegisters();
-  
   return true;
 }
 
