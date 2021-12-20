@@ -17,6 +17,7 @@
   #define BTN_3 25
   #define BTN_4 26
   #define BTN_5 27
+  #define BUZZ 15
 #endif
 
 #ifdef LILYGO
@@ -35,4 +36,5 @@
   #define BTN_3 14
   #define BTN_4 25
   #define BTN_5 15
+  #define BUZZ 4
 #endif

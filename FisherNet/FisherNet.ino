@@ -37,6 +37,7 @@
 #include <SoftwareSerial.h>
 #include "FisherMesh.h"
 #include <Preferences.h>
+#include <EasyBuzzer.h>
 
 // Setup Preferences library
 Preferences preferences;
@@ -94,7 +95,7 @@ unsigned long timeLastListened = 0;
 
 void setup() {
   setupDevice();
-  
+
   // Call the setup function of the current state
   setupState(currentState);
 }
@@ -132,6 +133,10 @@ void loop() {
 // =================
 void setupDevice() {
   Serial.begin(115200);
+  //buzzer setup - if placed in the rescuer code it will start buzzing in lilygo upon loading of the program
+  EasyBuzzer.setPin(BUZZ);
+  EasyBuzzer.beep(2500);
+  EasyBuzzer.stopBeep();  
   Serial.println("Beginning device setup...");
   setupOled();
   setupGps();
