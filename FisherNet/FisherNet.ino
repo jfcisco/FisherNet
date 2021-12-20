@@ -168,7 +168,7 @@ void setupDevice() {
   oled.setTextSize(2);
   oled.println("FisherNET");
   oled.setTextSize(1);
-  oled.println("(version 3.0 Hito)");
+  oled.println("(version 4.0 Tamban)");
   oled.display();
   delay(2000);
 }
