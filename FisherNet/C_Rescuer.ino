@@ -227,7 +227,7 @@ void showNavAids(DistressSignal distData, float currLat, float curLong) {
   oled.setCursor(0, 0);
   
   oled.setTextSize(2);
-  oled.println("BOAT 2");
+  oled.println("BOAT " + String(distData.address));
 
   if (isValidGps(distData.gpsLat, distData.gpsLong) && gpsVal) {
     // Print the current direction
@@ -241,8 +241,8 @@ void showNavAids(DistressSignal distData, float currLat, float curLong) {
     oled.println("m");
   }
   else {
-    oled.print("DIREK N/A");
-    oled.print("DIS N/A");
+    oled.println("DIREK N/A");
+    oled.println("DIS N/A");
   }
      
   oled.display();
@@ -328,6 +328,7 @@ void handleButton2Click() {
 void showInOled(String str[8]){
   oled.clearDisplay();
   oled.setCursor(0, 0);
+  oled.setTextSize(1);
   //8 lines/rows
   //21 columns/chars per line
   for(int x = 0; x < 8; x++){
