@@ -5,6 +5,13 @@ bool gpsVal = false;
 DistressSignal distData;
 unsigned long timeLastResponseSent;
 
+/*  Defines how long the device waits
+ *  between consecutive sending of
+ *  distress responses to the distressed
+ *  vessel/boat.
+*/
+#define DISTRESS_RESPONSE_INTERVAL 30000
+
 //global situation variables
 bool distAcc; //rescuer - distress signal accepted
 int situation;
@@ -17,6 +24,13 @@ int situation;
  *  5 distress signal ignored
  */
 
+enum RescuerScreen {
+  DETAILS,
+  NAVAIDS
+};
+
+RescuerScreen currentScreen = DETAILS;
+
 void Rescuer_setup(DistressSignal distress) {
   oled.clearDisplay();
   oled.setTextSize(1);
@@ -24,22 +38,6 @@ void Rescuer_setup(DistressSignal distress) {
   
   // Initialize variables
   distData = distress;
-
-  /* Dummy distress signal for UI testing:
-  DistressSignal dummyDistress = {
-    {
-      DISTRESS_SIGNAL
-    },
-    255,
-    14.1234567,
-    121.9876543,
-    ALERT_GENERAL,
-    2,
-    false
-  };
-  
-  distData = dummyDistress;
-  */
   
   timeLastResponseSent = 0;
   distRec = true; //rescuer - distress signal received
@@ -60,16 +58,16 @@ void Rescuer_setup(DistressSignal distress) {
   button2.attachClick(handleButton2Click);
   button2.attachDoubleClick(doNothing);
   button2.attachLongPressStart(doNothing);
-  button3.attachClick(handleButton3Click);
+  button3.attachClick(doNothing);
   button3.attachDoubleClick(doNothing);
   button3.attachLongPressStart(doNothing);
-  button4.attachClick(handleButton4Click);
+  button4.attachClick(doNothing);
   button4.attachDoubleClick(doNothing);
   button4.attachLongPressStart(doNothing);
-  button5.attachClick(handleButton5Click);
+  button5.attachClick(doNothing);
   button5.attachDoubleClick(doNothing);
   button5.attachLongPressStart(doNothing);
- }
+}
 
 void Rescuer_loop() {
   //getupdated gps
@@ -145,7 +143,7 @@ void Rescuer_loop() {
       }
       break;
     case 4:
-      //4 distress accepted - to the rescue mode
+      // 4 distress accepted - to the rescue mode
       //continue to display updates rescuee info with option to cancel
 
       // What if the received distress signal does not match the original vessel?
@@ -164,36 +162,20 @@ void Rescuer_loop() {
           else distData = distDataTemp;
         }
       }
-      
-      str[0] = "GOTO BOAT " + String(distData.address);
-      
-      if (isValidGps(distData.gpsLat, distData.gpsLong)) {
-        str[1] = "LAT: " + String(distData.gpsLat, 5);
-        str[2] = "LONG: " + String(distData.gpsLong,5 );
 
-        // Calculate distance if both rescuee and rescuer GPS data is valid
-        if (gpsVal) {
-          float distanceInMeters = gps.distanceBetween(currLat, currLong, distData.gpsLat, distData.gpsLong);
-          str[3] = "DIS: " + String(distanceInMeters, 2) + " m";
-        }
-        else {
-          str[3] = "DIS: Not Available";
-        }
-      } 
-      else {
-        str[1] = "LAT: Not Available";
-        str[2] = "LONG: Not Available";
-        str[3] = "DIS: Not Available";
+      // Display either DETAILS (rescuer details)
+      // or NAVAIDS (navigational aids) screen depending
+      // on the user's current selection
+      if (currentScreen == DETAILS) {
+        showRescueeDetails(str, distData, currLat, currLong);
       }
-      str[4] = "AL " + String(distData.alertLevel + 1);
-      str[5] = " ";
-      str[6] = "BTN 2 END/CANCEL";
-
-      showInOled(str);      
+      else if (currentScreen == NAVAIDS) {
+        showNavAids(distData, currLat, currLong);
+      }
 
       // continue to get and send rescuer data/distress response
       // Limit to every 30 seconds as to not overwhelm the radio/network
-      if (currentRescuerTime - timeLastResponseSent > 30000) {
+      if (currentRescuerTime - timeLastResponseSent > DISTRESS_RESPONSE_INTERVAL) {
         timeLastResponseSent = currentRescuerTime;
         mesh.sendDistressResponse(distData.address, currLat, currLong);
       }
@@ -211,37 +193,96 @@ void Rescuer_loop() {
   } // situation switch
 }
 
+/* UIs for Rescuer */
+void showRescueeDetails(String str[8], DistressSignal distData, float currLat, float curLong) {
+  str[0] = "GOTO BOAT " + String(distData.address);
+      
+  if (isValidGps(distData.gpsLat, distData.gpsLong)) {
+    str[1] = "LAT: " + String(distData.gpsLat, 5);
+    str[2] = "LONG: " + String(distData.gpsLong,5 );
+
+    // Calculate distance if both rescuee and rescuer GPS data is valid
+    if (gpsVal) {
+      float distanceInMeters = gps.distanceBetween(currLat, currLong, distData.gpsLat, distData.gpsLong);
+      str[3] = "DIS: " + String(distanceInMeters, 2) + " m";
+    }
+    else {
+      str[3] = "DIS: Not Available";
+    }
+  } 
+  else {
+    str[1] = "LAT: Not Available";
+    str[2] = "LONG: Not Available";
+    str[3] = "DIS: Not Available";
+  }
+  str[4] = "AL " + String(distData.alertLevel + 1);
+  str[5] = " ";
+  str[6] = "BTN 2 END/CANCEL";
+
+  showInOled(str);
+}
+
+void showNavAids(DistressSignal distData, float currLat, float curLong) {
+  oled.clearDisplay();
+  oled.setCursor(0, 0);
+  
+  oled.setTextSize(2);
+  oled.println("BOAT 2");
+
+  if (isValidGps(distData.gpsLat, distData.gpsLong) && gpsVal) {
+    // Print the current direction
+    oled.print("DIREK ");
+    String dir = getDirection(currLat, currLong, distData.gpsLat, distData.gpsLong);
+    oled.println(dir);
+    
+    oled.print("DIS ");
+    float distanceInMeters = gps.distanceBetween(currLat, currLong, distData.gpsLat, distData.gpsLong);
+    oled.print(distanceInMeters, 0);
+    oled.println("m");
+  }
+  else {
+    oled.print("DIREK N/A");
+    oled.print("DIS N/A");
+  }
+     
+  oled.display();
+}
+
+String getDirection(float sourceLat, float sourceLong, float destLat, float destLong) {
+  double courseTo = TinyGPSPlus::courseTo(
+    sourceLat,
+    sourceLong,
+    destLat,
+    destLong);
+
+  return String(TinyGPSPlus::cardinal(courseTo));
+}
+
 // Button handlers*******
 void handleButton1Click() {
   //button 1
   int bt = 1;
+  Serial.println("Situation " +String(situation)+ " button " + String(bt));
+  
   switch(situation){
-    case 0:
-    case 1:
-    case 2:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
-      break;
     case 3:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
       //3 distress received - those in distress can't be rescuers
       distAcc = true;
       EasyBuzzer.stopBeep();
       mesh.sendDistressResponse(distData.address, currLat, currLong);
-      Serial.print("Accept? ");
       Serial.println(distAcc);
+      Serial.print("Accept? ");
       break;
     case 4:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
       //4 distress accepted - to the rescue mode
-//      distRec = false;
-//      distIgn = false;
-//      distAcc = false;
-//      break;
+      // During the rescuing phase, switch screens on a button press
+      currentScreen = (currentScreen == DETAILS) ? NAVAIDS : DETAILS;
+      break;
     case 5:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
       //5 distress signal ignored
       distIgn = false;
-  }//situation switch
+      break;
+  }
 }
 void handleButton2Click() {
   //button 2
@@ -281,78 +322,6 @@ void handleButton2Click() {
       Serial.println("Situation " +String(situation)+ " button " + String(bt));
       //5 distress signal ignored
 
-  }//situation switch
-}
-void handleButton3Click() {
-  //button 3
-  int bt = 3;
-  switch(situation){
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
-      break;
-  }//situation switch
-}
-void handleButton4Click() {
-  //button 4
-  int bt = 4;
-  switch(situation){
-    case 0:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
-      //default - not in distress and no distress received
-      break;
-    case 1:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
-      //1 in distress no response
-      break;
-    case 2:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
-      //2 in distress with response
-      break;
-    case 3:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
-      //3 distress received - those in distress can't be rescuers
-      break;
-    case 4:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
-      //4 distress accepted - to the rescue mode
-      break;
-    case 5:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
-      //5 distress signal ignored
-  }//situation switch
-}
-void handleButton5Click() {
-  //button 5
-  int bt = 5;
-  switch(situation){
-    case 0:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
-      //default - not in distress and no distress received
-      break;
-    case 1:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
-      //1 in distress no response
-      break;
-    case 2:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
-      //2 in distress with response
-      break;
-    case 3:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
-      //3 distress received - those in distress can't be rescuers
-      break;
-    case 4:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
-      //4 distress accepted - to the rescue mode
-      break;
-    case 5:
-      Serial.println("Situation " +String(situation)+ " button " + String(bt));
-      //5 distress signal ignored
   }//situation switch
 }
 
@@ -402,7 +371,6 @@ int getSituation(){
    *  4 distress accepted - to the rescue mode
    *  5 distress signal ignored
    */
-  //Serial.println("Start of sit eval = in distress " + String(inDistress) +"+ distress rec " +String(distRec)+ " = Situation: " + String(sit));
   if(distIgn){
     //ignore if they are in trouble themselves - return to rescuee menu and not display data of rescue request received
     sit = 5;

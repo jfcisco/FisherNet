@@ -1,7 +1,7 @@
 // This code displays the default screen showing the MENU on the OLED for all types of devices.
 
-bool distRec;     //rescuer - distress signal received
-bool distressSelected;  // flag to switch to IN_DISTRESS state
+bool distRec;           // Rescuer - distress signal received
+bool distressSelected;  // Flag to switch to IN_DISTRESS state
 
 // Declare variable for the slideshow menu
 byte optionSelected; 
