@@ -125,8 +125,11 @@ void Rescuer_loop() {
         str[7] = "BTN 2 IGNORE";
   
         showInOled(str);
+        //buzzer
+        EasyBuzzer.update();        
       } 
       else {
+        EasyBuzzer.stopBeep();
         receiveCancelBroadcast();
       }
 
@@ -135,6 +138,7 @@ void Rescuer_loop() {
       if(distRec) {
         DistressSignal distDataTemp = mesh.getDistressSignal();
         if (distDataTemp.cancelFlag) {
+          EasyBuzzer.stopBeep();
           receiveCancelBroadcast();
         }
         else distData = distDataTemp;
@@ -191,7 +195,7 @@ void Rescuer_loop() {
       // Limit to every 30 seconds as to not overwhelm the radio/network
       if (currentRescuerTime - timeLastResponseSent > 30000) {
         timeLastResponseSent = currentRescuerTime;
-        distAcc = mesh.sendDistressResponse(distData.address, currLat, currLong);
+        mesh.sendDistressResponse(distData.address, currLat, currLong);
       }
       break;
     
@@ -220,7 +224,9 @@ void handleButton1Click() {
     case 3:
       Serial.println("Situation " +String(situation)+ " button " + String(bt));
       //3 distress received - those in distress can't be rescuers
-      distAcc = mesh.sendDistressResponse(distData.address, currLat, currLong);
+      distAcc = true;
+      EasyBuzzer.stopBeep();
+      mesh.sendDistressResponse(distData.address, currLat, currLong);
       Serial.print("Accept? ");
       Serial.println(distAcc);
       break;
@@ -256,6 +262,7 @@ void handleButton2Click() {
       timeLastListened = millis();
 
       cancelRescueMessage();
+      EasyBuzzer.stopBeep();
       delay(2000);
       // Change state to rescuer menu
       changeProgramState(DEFAULT_MENU);
