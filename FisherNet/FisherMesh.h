@@ -143,11 +143,12 @@ bool FisherMesh::init(uint8_t address, float frequency) {
 
   // Set the radio frequency to the correct one
   if (!_rf95.setFrequency(_frequency)) {
-    Serial.println("LORA Module failed to set frequency");
+    Serial.println("LoRa Module failed to set frequency");
     return false;
   }
 
   Serial.printf("Frequency set at %f\n", _frequency);
+  
   return true;
 }
 

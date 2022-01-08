@@ -16,6 +16,14 @@ void DistressSignal_setup(AlertLevel al) {
 
   // Setup button click code
   DistressSignal_setupButtons();
+
+  oled.clearDisplay();
+  oled.setCursor(0, 0);
+  oled.setTextSize(2);
+  oled.println("Sending");
+  oled.print("ALERT LVL ");
+  oled.println(currentAlertLevel + 1, DEC);
+  oled.display();
 }
 
 void handleConfirm() {

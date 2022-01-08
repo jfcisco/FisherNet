@@ -1,6 +1,6 @@
 /**
- * FisherNet v3.1 - Hito
- * December 5, 2021
+ * SafetyNet v4.0 - Tamban
+ * December 18, 2021
  * 
  * In fulfillment of the final project requirement
  * for CMSC 205: Data Communications and Networking
@@ -20,8 +20,8 @@
 // Device Setup
 // =============
 //  **IMPORTANT!!** Uncomment the device you are using
-// #define LILYGO
-#define EGIZMO 
+#define LILYGO
+// #define EGIZMO 
 // #define DEBUG_MODE
 
 #include "PinAssignments.h"
@@ -37,6 +37,7 @@
 #include <SoftwareSerial.h>
 #include "FisherMesh.h"
 #include <Preferences.h>
+#include <EasyBuzzer.h>
 
 // Setup Preferences library
 Preferences preferences;
@@ -94,7 +95,7 @@ unsigned long timeLastListened = 0;
 
 void setup() {
   setupDevice();
-  
+
   // Call the setup function of the current state
   setupState(currentState);
 }
@@ -132,6 +133,10 @@ void loop() {
 // =================
 void setupDevice() {
   Serial.begin(115200);
+  //buzzer setup - if placed in the rescuer code it will start buzzing in lilygo upon loading of the program
+  EasyBuzzer.setPin(BUZZ);
+  EasyBuzzer.beep(2500);
+  EasyBuzzer.stopBeep();  
   Serial.println("Beginning device setup...");
   setupOled();
   setupGps();
@@ -163,7 +168,7 @@ void setupDevice() {
   oled.setTextSize(2);
   oled.println("FisherNET");
   oled.setTextSize(1);
-  oled.println("(version 3.0 Hito)");
+  oled.println("(version 4.0 Tamban)");
   oled.display();
   delay(2000);
 }
