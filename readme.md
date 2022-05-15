@@ -32,8 +32,11 @@ Gulshan Vasson
 
 ## Required Libraries
 - Adafruit SSD1306
-- TinyGPS++
+- [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/)
 - ESPSoftwareSerial
 - LoRa
 - OneButton
-- RadioHead
+- [RadioHead](https://www.airspayce.com/mikem/arduino/RadioHead/index.html)
+- EasyBuzzer
+
+Those listed with links are not available in the Library Manager of the Arduino IDE and must be downloaded from the linked websites.
